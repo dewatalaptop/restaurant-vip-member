@@ -1,25 +1,146 @@
-// Konfigurasi JSONBin.io
-const BIN_ID = '68542d8b8561e97a5027485f';
-const API_KEY = '$2a$10$kI38r2sqJ71/zzWqKkuztu.FAEx3jKDQE3HspuLBhdPlEdAXELAoq';
+// ==============================================
+// CONFIGURATION
+// ==============================================
+const BIN_ID = '68542d8b8561e97a5027485f';      // Replace with your JSONBin.io bin ID
+const API_KEY = '$2a$10$kI38r2sqJ71/zzWqKkuztu.FAEx3jKDQE3HspuLBhdPlEdAXELAoq';    // Replace with your JSONBin.io X-Master-Key
 const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-// Fungsi untuk memuat data member dari JSONBin.io
+// ==============================================
+// QR SCANNER SETUP
+// ==============================================
+let html5QrCode;
+let currentCameraId;
+
+async function initQRScanner() {
+    try {
+        // Clear previous scanner if exists
+        if (html5QrCode) {
+            html5QrCode.clear();
+        }
+
+        // Create new scanner instance
+        html5QrCode = new Html5Qrcode("qr-reader");
+        
+        // Get available cameras
+        const cameras = await Html5Qrcode.getCameras();
+        if (cameras.length === 0) {
+            throw "No cameras found";
+        }
+
+        // Use back camera by default if available
+        currentCameraId = cameras.find(cam => cam.label.includes("back"))?.id || cameras[0].id;
+        
+        // Start scanning
+        await html5QrCode.start(
+            currentCameraId,
+            {
+                fps: 10,                        // Lower FPS for better performance
+                qrbox: { width: 250, height: 250 }, // Smaller scan area for better accuracy
+                facingMode: "environment"        // Prefer rear camera
+            },
+            qrCodeMessage => {
+                // Success callback
+                handleScannedQR(qrCodeMessage);
+            },
+            errorMessage => {
+                // Error callback
+                console.log(`QR Error: ${errorMessage}`);
+            }
+        ).catch(err => {
+            console.error("Scanner start error:", err);
+            showAlert("Gagal memulai scanner: " + err);
+        });
+
+        // Setup camera toggle button if exists
+        const toggleBtn = document.getElementById('toggle-camera');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', toggleCamera);
+        }
+
+    } catch (error) {
+        console.error("Scanner init failed:", error);
+        showAlert("Error scanner: " + error);
+        
+        // Fallback to manual input if scanner fails
+        setupManualInputFallback();
+    }
+}
+
+async function toggleCamera() {
+    try {
+        const cameras = await Html5Qrcode.getCameras();
+        if (cameras.length < 2) {
+            showAlert("Hanya 1 kamera tersedia");
+            return;
+        }
+
+        // Find next camera
+        const currentIndex = cameras.findIndex(cam => cam.id === currentCameraId);
+        const nextIndex = (currentIndex + 1) % cameras.length;
+        currentCameraId = cameras[nextIndex].id;
+
+        // Restart scanner with new camera
+        await html5QrCode.stop();
+        await initQRScanner();
+        
+    } catch (error) {
+        console.error("Camera toggle error:", error);
+        showAlert("Gagal ganti kamera");
+    }
+}
+
+function handleScannedQR(qrData) {
+    // Stop scanner after successful scan
+    html5QrCode.stop().catch(console.error);
+    
+    // Process the scanned data
+    if (qrData) {
+        findMemberById(qrData.trim()); // Trim whitespace from QR code
+    }
+}
+
+function setupManualInputFallback() {
+    const scanSection = document.querySelector('.scanner-section');
+    if (!scanSection) return;
+
+    scanSection.innerHTML += `
+        <div class="manual-fallback">
+            <p class="error-message">Scanner tidak tersedia</p>
+            <div class="form-group">
+                <label for="manual-qr-input">Masukkan ID Member secara manual:</label>
+                <input type="text" id="manual-qr-input" placeholder="VIP123456">
+                <button id="manual-submit" class="btn-secondary">Cari Member</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('manual-submit').addEventListener('click', () => {
+        const manualId = document.getElementById('manual-qr-input').value;
+        if (manualId) {
+            findMemberById(manualId);
+        } else {
+            showAlert("Harap masukkan ID Member");
+        }
+    });
+}
+
+// ==============================================
+// MEMBER SYSTEM FUNCTIONS
+// ==============================================
 async function loadMembers() {
     try {
         const response = await fetch(API_URL, {
-            headers: {
-                'X-Master-Key': API_KEY
-            }
+            headers: { 'X-Master-Key': API_KEY }
         });
         const data = await response.json();
         return data.record.members || [];
     } catch (error) {
-        console.error('Error loading members:', error);
+        console.error("Load members error:", error);
+        showAlert("Gagal memuat data member");
         return [];
     }
 }
 
-// Fungsi untuk menyimpan data member ke JSONBin.io
 async function saveMembers(members) {
     try {
         const response = await fetch(API_URL, {
@@ -32,11 +153,27 @@ async function saveMembers(members) {
         });
         return await response.json();
     } catch (error) {
-        console.error('Error saving members:', error);
+        console.error("Save members error:", error);
+        showAlert("Gagal menyimpan data member");
     }
 }
 
-// Fungsi untuk menampilkan profil member
+async function findMemberById(memberId) {
+    try {
+        const members = await loadMembers();
+        const member = members.find(m => m.id === memberId);
+        
+        if (member) {
+            displayMemberProfile(member);
+        } else {
+            showAlert(`Member dengan ID ${memberId} tidak ditemukan`);
+        }
+    } catch (error) {
+        console.error("Find member error:", error);
+        showAlert("Error mencari member");
+    }
+}
+
 function displayMemberProfile(member) {
     document.getElementById('member-name').textContent = member.name;
     document.getElementById('member-id').textContent = member.id;
@@ -45,60 +182,36 @@ function displayMemberProfile(member) {
     document.getElementById('member-phone').textContent = member.phone;
     document.getElementById('member-photo').src = member.photo || 'https://via.placeholder.com/150';
     
+    // Show profile section
     document.querySelector('.member-profile').classList.remove('hidden');
+    
+    // Scroll to profile
+    document.querySelector('.member-profile').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Inisialisasi QR Scanner
-function initQRScanner() {
-    const qrReader = new QrScanner(
-        document.getElementById('qr-reader'),
-        result => {
-            const memberId = result;
-            findMemberById(memberId);
-        },
-        {
-            highlightScanRegion: true,
-            highlightCodeOutline: true,
-        }
-    );
-    
-    qrReader.start();
-    
-    // Tombol scan QR di form tambah member
-    if (document.getElementById('scan-qr')) {
-        document.getElementById('scan-qr').addEventListener('click', () => {
-            qrReader.start();
-        });
-    }
-}
-
-// Cari member berdasarkan ID
-async function findMemberById(id) {
-    const members = await loadMembers();
-    const member = members.find(m => m.id === id);
-    
-    if (member) {
-        displayMemberProfile(member);
-    } else {
-        alert('Member tidak ditemukan');
-    }
-}
-
-// Tambahkan poin ke member
 async function addPointToMember() {
     const memberId = document.getElementById('member-id').textContent;
-    const members = await loadMembers();
-    const memberIndex = members.findIndex(m => m.id === memberId);
-    
-    if (memberIndex !== -1) {
-        members[memberIndex].points = (members[memberIndex].points || 0) + 1;
-        await saveMembers(members);
-        displayMemberProfile(members[memberIndex]);
-        alert('Poin berhasil ditambahkan!');
+    if (!memberId) return;
+
+    try {
+        const members = await loadMembers();
+        const memberIndex = members.findIndex(m => m.id === memberId);
+        
+        if (memberIndex !== -1) {
+            members[memberIndex].points = (members[memberIndex].points || 0) + 1;
+            await saveMembers(members);
+            displayMemberProfile(members[memberIndex]);
+            showAlert("Poin berhasil ditambahkan!", "success");
+        }
+    } catch (error) {
+        console.error("Add point error:", error);
+        showAlert("Gagal menambah poin");
     }
 }
 
-// Handle form tambah member
+// ==============================================
+// NEW MEMBER FORM (for add-member.html)
+// ==============================================
 async function handleMemberFormSubmit(e) {
     e.preventDefault();
     
@@ -107,29 +220,48 @@ async function handleMemberFormSubmit(e) {
     const phone = document.getElementById('phone').value;
     const qrCode = document.getElementById('qr-code').value;
     const photoFile = document.getElementById('photo').files[0];
-    
-    // Konversi foto ke base64
-    const photo = await fileToBase64(photoFile);
-    
-    const newMember = {
-        id: qrCode,
-        name,
-        address,
-        phone,
-        photo,
-        points: 0,
-        joinDate: new Date().toISOString()
-    };
-    
-    const members = await loadMembers();
-    members.push(newMember);
-    await saveMembers(members);
-    
-    alert('Member berhasil ditambahkan!');
-    window.location.href = 'index.html';
+
+    if (!name || !address || !phone || !qrCode || !photoFile) {
+        showAlert("Harap isi semua field");
+        return;
+    }
+
+    try {
+        // Convert photo to base64
+        const photo = await fileToBase64(photoFile);
+        
+        const newMember = {
+            id: qrCode,
+            name,
+            address,
+            phone,
+            photo,
+            points: 0,
+            joinDate: new Date().toISOString()
+        };
+        
+        const members = await loadMembers();
+        
+        // Check if member ID already exists
+        if (members.some(m => m.id === qrCode)) {
+            showAlert("ID Member sudah terdaftar");
+            return;
+        }
+        
+        members.push(newMember);
+        await saveMembers(members);
+        
+        showAlert("Member berhasil ditambahkan!", "success");
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1500);
+        
+    } catch (error) {
+        console.error("Add member error:", error);
+        showAlert("Gagal menambah member");
+    }
 }
 
-// Konversi file ke base64
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -139,10 +271,11 @@ function fileToBase64(file) {
     });
 }
 
-// Preview foto saat dipilih
 function setupPhotoPreview() {
     const photoInput = document.getElementById('photo');
     const photoPreview = document.getElementById('photo-preview');
+    
+    if (!photoInput || !photoPreview) return;
     
     photoInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
@@ -155,19 +288,47 @@ function setupPhotoPreview() {
     });
 }
 
-// Inisialisasi halaman
+// ==============================================
+// UTILITY FUNCTIONS
+// ==============================================
+function showAlert(message, type = "error") {
+    const alertBox = document.createElement('div');
+    alertBox.className = `alert ${type}`;
+    alertBox.textContent = message;
+    
+    document.body.appendChild(alertBox);
+    
+    setTimeout(() => {
+        alertBox.classList.add('fade-out');
+        setTimeout(() => alertBox.remove(), 500);
+    }, 3000);
+}
+
+// ==============================================
+// INITIALIZATION
+// ==============================================
 document.addEventListener('DOMContentLoaded', function() {
-    // Halaman utama
+    // Initialize scanner on main page
     if (document.getElementById('qr-reader')) {
         initQRScanner();
         
-        // Tombol tambah poin
-        document.getElementById('add-point').addEventListener('click', addPointToMember);
+        // Add point button
+        document.getElementById('add-point')?.addEventListener('click', addPointToMember);
     }
     
-    // Halaman tambah member
+    // Initialize member form on add-member page
     if (document.getElementById('member-form')) {
         setupPhotoPreview();
         document.getElementById('member-form').addEventListener('submit', handleMemberFormSubmit);
+        
+        // Setup QR scan button
+        document.getElementById('scan-qr')?.addEventListener('click', async () => {
+            try {
+                await initQRScanner();
+                showAlert("Arahkan kamera ke QR Code member", "info");
+            } catch (error) {
+                showAlert("Gagal memulai scanner");
+            }
+        });
     }
 });
