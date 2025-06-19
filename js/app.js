@@ -1,6 +1,6 @@
 // Konfigurasi JSONBin.io
-const BIN_ID = 'YOUR_BIN_ID';
-const API_KEY = 'YOUR_API_KEY';
+const BIN_ID = '68542d8b8561e97a5027485f';
+const API_KEY = '$2a$10$kI38r2sqJ71/zzWqKkuztu.FAEx3jKDQE3HspuLBhdPlEdAXELAoq';
 const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
 // Fungsi untuk memuat data member dari JSONBin.io
