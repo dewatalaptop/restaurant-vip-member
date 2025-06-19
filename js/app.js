@@ -1,131 +1,201 @@
 // ==============================================
-// CONFIGURATION
+// KONFIGURASI
 // ==============================================
-const BIN_ID = '68542d8b8561e97a5027485f';      // Replace with your JSONBin.io bin ID
-const API_KEY = '$2a$10$kI38r2sqJ71/zzWqKkuztu.FAEx3jKDQE3HspuLBhdPlEdAXELAoq';    // Replace with your JSONBin.io X-Master-Key
+const BIN_ID = '68542d8b8561e97a5027485f';      // Ganti dengan bin ID Anda
+const API_KEY = '$2a$10$kI38r2sqJ71/zzWqKkuztu.FAEx3jKDQE3HspuLBhdPlEdAXELAoq';    // Ganti dengan API key Anda
 const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
 // ==============================================
-// QR SCANNER SETUP
+// ELEMEN DOM
 // ==============================================
-let html5QrCode;
-let currentCameraId;
+const videoElement = document.getElementById('preview');
+const scanStatus = document.getElementById('scan-status');
+const scannerContainer = document.getElementById('scanner-container');
+const manualFallback = document.querySelector('.manual-fallback');
 
-async function initQRScanner() {
+// ==============================================
+// VARIABEL STATE
+// ==============================================
+let scannerActive = false;
+let mediaStream = null;
+let scanInterval = null;
+
+// ==============================================
+// INISIALISASI SCANNER
+// ==============================================
+document.getElementById('start-scanner').addEventListener('click', startScanner);
+document.getElementById('stop-scanner').addEventListener('click', stopScanner);
+document.getElementById('manual-submit').addEventListener('click', manualSearch);
+
+async function startScanner() {
     try {
-        // Clear previous scanner if exists
-        if (html5QrCode) {
-            html5QrCode.clear();
-        }
-
-        // Create new scanner instance
-        html5QrCode = new Html5Qrcode("qr-reader");
-        
-        // Get available cameras
-        const cameras = await Html5Qrcode.getCameras();
-        if (cameras.length === 0) {
-            throw "No cameras found";
-        }
-
-        // Use back camera by default if available
-        currentCameraId = cameras.find(cam => cam.label.includes("back"))?.id || cameras[0].id;
-        
-        // Start scanning
-        await html5QrCode.start(
-            currentCameraId,
-            {
-                fps: 10,                        // Lower FPS for better performance
-                qrbox: { width: 250, height: 250 }, // Smaller scan area for better accuracy
-                facingMode: "environment"        // Prefer rear camera
-            },
-            qrCodeMessage => {
-                // Success callback
-                handleScannedQR(qrCodeMessage);
-            },
-            errorMessage => {
-                // Error callback
-                console.log(`QR Error: ${errorMessage}`);
-            }
-        ).catch(err => {
-            console.error("Scanner start error:", err);
-            showAlert("Gagal memulai scanner: " + err);
-        });
-
-        // Setup camera toggle button if exists
-        const toggleBtn = document.getElementById('toggle-camera');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', toggleCamera);
-        }
-
-    } catch (error) {
-        console.error("Scanner init failed:", error);
-        showAlert("Error scanner: " + error);
-        
-        // Fallback to manual input if scanner fails
-        setupManualInputFallback();
-    }
-}
-
-async function toggleCamera() {
-    try {
-        const cameras = await Html5Qrcode.getCameras();
-        if (cameras.length < 2) {
-            showAlert("Hanya 1 kamera tersedia");
+        // Cek permission kamera
+        if (!hasCameraPermission()) {
+            scanStatus.textContent = "Izinkan akses kamera untuk memulai scan";
+            showManualFallback();
             return;
         }
 
-        // Find next camera
-        const currentIndex = cameras.findIndex(cam => cam.id === currentCameraId);
-        const nextIndex = (currentIndex + 1) % cameras.length;
-        currentCameraId = cameras[nextIndex].id;
+        // Dapatkan stream kamera
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "environment",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        });
 
-        // Restart scanner with new camera
-        await html5QrCode.stop();
-        await initQRScanner();
+        // Setup video element
+        videoElement.srcObject = mediaStream;
+        videoElement.play();
+        
+        // Tampilkan scanner
+        scannerContainer.style.display = 'block';
+        document.getElementById('start-scanner').style.display = 'none';
+        scannerActive = true;
+        scanStatus.textContent = "Scanning... Arahkan ke QR Code member";
+        
+        // Mulai scanning loop
+        scanInterval = setInterval(scanQRCode, 300);
         
     } catch (error) {
-        console.error("Camera toggle error:", error);
-        showAlert("Gagal ganti kamera");
+        console.error("Error starting scanner:", error);
+        scanStatus.textContent = "Gagal mengakses kamera: " + error.message;
+        showManualFallback();
     }
 }
 
-function handleScannedQR(qrData) {
-    // Stop scanner after successful scan
-    html5QrCode.stop().catch(console.error);
+function stopScanner() {
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+    }
     
-    // Process the scanned data
-    if (qrData) {
-        findMemberById(qrData.trim()); // Trim whitespace from QR code
+    if (scanInterval) {
+        clearInterval(scanInterval);
+        scanInterval = null;
     }
-}
-
-function setupManualInputFallback() {
-    const scanSection = document.querySelector('.scanner-section');
-    if (!scanSection) return;
-
-    scanSection.innerHTML += `
-        <div class="manual-fallback">
-            <p class="error-message">Scanner tidak tersedia</p>
-            <div class="form-group">
-                <label for="manual-qr-input">Masukkan ID Member secara manual:</label>
-                <input type="text" id="manual-qr-input" placeholder="VIP123456">
-                <button id="manual-submit" class="btn-secondary">Cari Member</button>
-            </div>
-        </div>
-    `;
-
-    document.getElementById('manual-submit').addEventListener('click', () => {
-        const manualId = document.getElementById('manual-qr-input').value;
-        if (manualId) {
-            findMemberById(manualId);
-        } else {
-            showAlert("Harap masukkan ID Member");
-        }
-    });
+    
+    scannerActive = false;
+    scannerContainer.style.display = 'none';
+    document.getElementById('start-scanner').style.display = 'block';
+    scanStatus.textContent = "Scanner dihentikan";
 }
 
 // ==============================================
-// MEMBER SYSTEM FUNCTIONS
+// FUNGSI SCANNING
+// ==============================================
+function scanQRCode() {
+    if (!scannerActive) return;
+    
+    try {
+        // Buat canvas temporer
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        
+        // Set ukuran canvas sesuai video
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        
+        // Gambar frame video ke canvas
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        
+        // Dapatkan image data
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Scan QR code
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+        });
+        
+        // Jika QR code ditemukan
+        if (code) {
+            scanStatus.textContent = "Member ditemukan! Memproses...";
+            stopScanner();
+            findMemberById(code.data);
+        }
+        
+    } catch (error) {
+        console.error("Scan error:", error);
+        // Lanjut scanning meski ada error
+    }
+}
+
+// ==============================================
+// MANUAL FALLBACK
+// ==============================================
+function showManualFallback() {
+    manualFallback.style.display = 'block';
+}
+
+function manualSearch() {
+    const memberId = document.getElementById('manual-input').value.trim();
+    if (!memberId) {
+        alert("Harap masukkan ID Member");
+        return;
+    }
+    findMemberById(memberId);
+}
+
+// ==============================================
+// FUNGSI MEMBER
+// ==============================================
+async function findMemberById(memberId) {
+    try {
+        scanStatus.textContent = "Mencari member...";
+        
+        const members = await loadMembers();
+        const member = members.find(m => m.id === memberId);
+        
+        if (member) {
+            displayMemberProfile(member);
+            scanStatus.textContent = "Member ditemukan: " + memberId;
+        } else {
+            scanStatus.textContent = "Member tidak ditemukan";
+            alert("Member dengan ID " + memberId + " tidak ditemukan");
+            startScanner(); // Mulai ulang scanner
+        }
+    } catch (error) {
+        console.error("Error finding member:", error);
+        scanStatus.textContent = "Error mencari member";
+        alert("Terjadi error saat mencari member");
+    }
+}
+
+function displayMemberProfile(member) {
+    document.getElementById('member-name').textContent = member.name;
+    document.getElementById('member-id').textContent = member.id;
+    document.getElementById('member-points').textContent = member.points || 0;
+    document.getElementById('member-address').textContent = member.address;
+    document.getElementById('member-phone').textContent = member.phone;
+    document.getElementById('member-photo').src = member.photo || 'https://via.placeholder.com/150';
+    
+    document.querySelector('.member-profile').classList.remove('hidden');
+}
+
+async function addPointToMember() {
+    const memberId = document.getElementById('member-id').textContent;
+    if (!memberId) return;
+    
+    try {
+        const members = await loadMembers();
+        const memberIndex = members.findIndex(m => m.id === memberId);
+        
+        if (memberIndex !== -1) {
+            members[memberIndex].points = (members[memberIndex].points || 0) + 1;
+            await saveMembers(members);
+            displayMemberProfile(members[memberIndex]);
+            alert("Poin berhasil ditambahkan!");
+        }
+    } catch (error) {
+        console.error("Error adding point:", error);
+        alert("Gagal menambahkan poin");
+    }
+}
+
+// ==============================================
+// FUNGSI DATABASE
 // ==============================================
 async function loadMembers() {
     try {
@@ -135,8 +205,8 @@ async function loadMembers() {
         const data = await response.json();
         return data.record.members || [];
     } catch (error) {
-        console.error("Load members error:", error);
-        showAlert("Gagal memuat data member");
+        console.error("Error loading members:", error);
+        alert("Gagal memuat data member");
         return [];
     }
 }
@@ -153,182 +223,28 @@ async function saveMembers(members) {
         });
         return await response.json();
     } catch (error) {
-        console.error("Save members error:", error);
-        showAlert("Gagal menyimpan data member");
-    }
-}
-
-async function findMemberById(memberId) {
-    try {
-        const members = await loadMembers();
-        const member = members.find(m => m.id === memberId);
-        
-        if (member) {
-            displayMemberProfile(member);
-        } else {
-            showAlert(`Member dengan ID ${memberId} tidak ditemukan`);
-        }
-    } catch (error) {
-        console.error("Find member error:", error);
-        showAlert("Error mencari member");
-    }
-}
-
-function displayMemberProfile(member) {
-    document.getElementById('member-name').textContent = member.name;
-    document.getElementById('member-id').textContent = member.id;
-    document.getElementById('member-points').textContent = member.points || 0;
-    document.getElementById('member-address').textContent = member.address;
-    document.getElementById('member-phone').textContent = member.phone;
-    document.getElementById('member-photo').src = member.photo || 'https://via.placeholder.com/150';
-    
-    // Show profile section
-    document.querySelector('.member-profile').classList.remove('hidden');
-    
-    // Scroll to profile
-    document.querySelector('.member-profile').scrollIntoView({ behavior: 'smooth' });
-}
-
-async function addPointToMember() {
-    const memberId = document.getElementById('member-id').textContent;
-    if (!memberId) return;
-
-    try {
-        const members = await loadMembers();
-        const memberIndex = members.findIndex(m => m.id === memberId);
-        
-        if (memberIndex !== -1) {
-            members[memberIndex].points = (members[memberIndex].points || 0) + 1;
-            await saveMembers(members);
-            displayMemberProfile(members[memberIndex]);
-            showAlert("Poin berhasil ditambahkan!", "success");
-        }
-    } catch (error) {
-        console.error("Add point error:", error);
-        showAlert("Gagal menambah poin");
+        console.error("Error saving members:", error);
+        alert("Gagal menyimpan data member");
     }
 }
 
 // ==============================================
-// NEW MEMBER FORM (for add-member.html)
+// UTILITAS
 // ==============================================
-async function handleMemberFormSubmit(e) {
-    e.preventDefault();
-    
-    const name = document.getElementById('name').value;
-    const address = document.getElementById('address').value;
-    const phone = document.getElementById('phone').value;
-    const qrCode = document.getElementById('qr-code').value;
-    const photoFile = document.getElementById('photo').files[0];
-
-    if (!name || !address || !phone || !qrCode || !photoFile) {
-        showAlert("Harap isi semua field");
-        return;
-    }
-
-    try {
-        // Convert photo to base64
-        const photo = await fileToBase64(photoFile);
-        
-        const newMember = {
-            id: qrCode,
-            name,
-            address,
-            phone,
-            photo,
-            points: 0,
-            joinDate: new Date().toISOString()
-        };
-        
-        const members = await loadMembers();
-        
-        // Check if member ID already exists
-        if (members.some(m => m.id === qrCode)) {
-            showAlert("ID Member sudah terdaftar");
-            return;
-        }
-        
-        members.push(newMember);
-        await saveMembers(members);
-        
-        showAlert("Member berhasil ditambahkan!", "success");
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1500);
-        
-    } catch (error) {
-        console.error("Add member error:", error);
-        showAlert("Gagal menambah member");
-    }
+function hasCameraPermission() {
+    // Implementasi sederhana untuk cek permission
+    // Di beberapa browser mungkin tidak berfungsi
+    return true;
 }
 
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
+// Event listener untuk tombol tambah poin
+document.getElementById('add-point')?.addEventListener('click', addPointToMember);
 
-function setupPhotoPreview() {
-    const photoInput = document.getElementById('photo');
-    const photoPreview = document.getElementById('photo-preview');
-    
-    if (!photoInput || !photoPreview) return;
-    
-    photoInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                photoPreview.innerHTML = `<img src="${e.target.result}" alt="Preview Foto">`;
-            };
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-}
-
-// ==============================================
-// UTILITY FUNCTIONS
-// ==============================================
-function showAlert(message, type = "error") {
-    const alertBox = document.createElement('div');
-    alertBox.className = `alert ${type}`;
-    alertBox.textContent = message;
-    
-    document.body.appendChild(alertBox);
-    
-    setTimeout(() => {
-        alertBox.classList.add('fade-out');
-        setTimeout(() => alertBox.remove(), 500);
-    }, 3000);
-}
-
-// ==============================================
-// INITIALIZATION
-// ==============================================
+// Inisialisasi awal
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize scanner on main page
-    if (document.getElementById('qr-reader')) {
-        initQRScanner();
-        
-        // Add point button
-        document.getElementById('add-point')?.addEventListener('click', addPointToMember);
-    }
-    
-    // Initialize member form on add-member page
-    if (document.getElementById('member-form')) {
-        setupPhotoPreview();
-        document.getElementById('member-form').addEventListener('submit', handleMemberFormSubmit);
-        
-        // Setup QR scan button
-        document.getElementById('scan-qr')?.addEventListener('click', async () => {
-            try {
-                await initQRScanner();
-                showAlert("Arahkan kamera ke QR Code member", "info");
-            } catch (error) {
-                showAlert("Gagal memulai scanner");
-            }
-        });
+    // Cek apakah di halaman scan
+    if (document.getElementById('start-scanner')) {
+        // Coba langsung start scanner di beberapa device
+        // startScanner();
     }
 });
