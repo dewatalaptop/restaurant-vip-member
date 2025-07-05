@@ -268,82 +268,6 @@
             transform: translateX(0);
         }
 
-        .action-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .action-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 400px;
-            box-shadow: var(--box-shadow);
-            text-align: center;
-        }
-
-        .modal-title {
-            font-size: 1.3em;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .modal-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .modal-button {
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .modal-button.member {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .modal-button.add {
-            background-color: var(--accent-color);
-            color: var(--dark-text-color);
-        }
-
-        .modal-button.edit {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .modal-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
         .nav-tabs {
             display: flex;
             justify-content: center;
@@ -501,9 +425,6 @@
                 padding: 8px 15px;
                 font-size: 0.9em;
             }
-            .modal-buttons {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -512,7 +433,7 @@
     <div class="main-container">
         <header>
             <h1><i class="fas fa-leaf"></i> Aplikasi VIP Dolan Sawah</h1>
-            <p>Manajemen Member VIP Restoran Organik</p>
+            <p>Manajemen Member VIP Resto</p>
         </header>
 
         <div class="nav-tabs">
@@ -531,7 +452,7 @@
             <div class="card">
                 <label class="label"><i class="fas fa-qrcode"></i> Hasil Pindaian QR Code</label>
                 <div id="result-display">Belum ada kode yang dipindai...</div>
-                <button id="copy-button" class="button button-tertiary" disabled><i class="fas fa-copy"></i> Salin Kode</button>
+                <button id="copy-button" class="button button-tertiary"><i class="fas fa-copy"></i> Salin Kode</button>
             </div>
         </div>
 
@@ -698,32 +619,13 @@
         </div>
     </div>
 
-    <!-- Notification -->
     <div id="notification" class="notification">
         <i class="fas fa-check-circle"></i>
         <span id="notification-text">Kode berhasil disalin!</span>
     </div>
 
-    <!-- Action Modal -->
-    <div id="action-modal" class="action-modal">
-        <div class="modal-content">
-            <div class="modal-title">Pilih Aksi untuk Member</div>
-            <div class="modal-buttons">
-                <button id="go-to-member" class="modal-button member">
-                    <i class="fas fa-users"></i> Lihat Data Member
-                </button>
-                <button id="go-to-add" class="modal-button add">
-                    <i class="fas fa-user-plus"></i> Tambah Member Baru
-                </button>
-                <button id="go-to-edit" class="modal-button edit">
-                    <i class="fas fa-user-edit"></i> Edit Data Member
-                </button>
-            </div>
-        </div>
-    </div>
-
     <footer>
-        &copy; 2025 Dolan Sawah Restaurant Group | <i class="fas fa-leaf"></i> Makanan Organik Berkualitas
+        &copy; 2025 Dolan Sawah Restaurant | <i class="fas fa-leaf"></i> By Ryan
     </footer>
 
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
@@ -764,49 +666,6 @@
                 }, 3000);
             }
 
-            // Action Modal
-            const actionModal = document.getElementById('action-modal');
-            const goToMemberBtn = document.getElementById('go-to-member');
-            const goToAddBtn = document.getElementById('go-to-add');
-            const goToEditBtn = document.getElementById('go-to-edit');
-            let lastScannedId = '';
-
-            function showActionModal() {
-                actionModal.classList.add('show');
-            }
-
-            function hideActionModal() {
-                actionModal.classList.remove('show');
-            }
-
-            goToMemberBtn.addEventListener('click', () => {
-                hideActionModal();
-                // Switch to member tab
-                document.querySelector('.nav-tab[data-tab="member"]').click();
-                // Paste ID to member input
-                document.getElementById('member-id-input').value = lastScannedId;
-                // Load member data
-                loadMemberData(lastScannedId);
-            });
-
-            goToAddBtn.addEventListener('click', () => {
-                hideActionModal();
-                // Switch to add tab
-                document.querySelector('.nav-tab[data-tab="add"]').click();
-                // Paste ID to new member input
-                document.getElementById('new-member-id').value = lastScannedId;
-            });
-
-            goToEditBtn.addEventListener('click', () => {
-                hideActionModal();
-                // Switch to edit tab
-                document.querySelector('.nav-tab[data-tab="edit"]').click();
-                // Paste ID to edit member input
-                document.getElementById('edit-member-id').value = lastScannedId;
-                // Trigger search
-                document.getElementById('search-member').click();
-            });
-
             // QR Code Scanner functionality
             const resultDisplay = document.getElementById('result-display');
             const copyButton = document.getElementById('copy-button');
@@ -815,7 +674,6 @@
             function onScanSuccess(decodedText, decodedResult) {
                 if (decodedText !== lastResult) {
                     lastResult = decodedText;
-                    lastScannedId = decodedText;
                     
                     resultDisplay.textContent = decodedText;
                     try {
@@ -825,20 +683,8 @@
                         // Not a URL
                     }
                     
-                    // Automatically copy to clipboard
-                    navigator.clipboard.writeText(decodedText)
-                        .then(() => {
-                            console.log('Kode berhasil disalin ke clipboard:', decodedText);
-                            copyButton.disabled = false;
-                            showNotification('Kode QR berhasil dipindai dan disalin!');
-                            
-                            // Show action modal
-                            showActionModal();
-                        })
-                        .catch(err => {
-                            console.error('Gagal menyalin teks: ', err);
-                            showNotification('Gagal menyalin kode. Pastikan HTTPS!');
-                        });
+                    copyButton.disabled = false;
+                    console.log(`Scan Selesai: ${decodedText}`);
                 }
             }
 
