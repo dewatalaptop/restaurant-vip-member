@@ -9,19 +9,22 @@
     
     <style>
         :root {
-            --primary-color: #0056b3; /* Biru Tua */
-            --secondary-color: #28a745; /* Hijau Sukses */
-            --background-color: #f0f2f5;
+            --primary-color: #2e7d32; /* Hijau tua */
+            --secondary-color: #4caf50; /* Hijau sedang */
+            --accent-color: #8bc34a; /* Hijau muda */
+            --background-color: #e8f5e9; /* Hijau sangat muda */
             --card-background: #ffffff;
-            --text-color: #333333;
+            --text-color: #2e7d32;
             --light-text-color: #ffffff;
+            --dark-text-color: #1b5e20;
             --border-radius: 12px;
-            --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            --error-color: #dc3545;
+            --box-shadow: 0 6px 20px rgba(46, 125, 50, 0.15);
+            --error-color: #c62828;
+            --success-color: #2e7d32;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,17 +33,25 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
-            color: var(--text-color);
+            color: var(--dark-text-color);
+            background-image: linear-gradient(to bottom right, #e8f5e9, #c8e6c9);
         }
 
         .main-container {
             width: 100%;
             max-width: 500px;
             text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
         }
         
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         header {
             margin-bottom: 25px;
+            text-align: center;
         }
 
         header h1 {
@@ -51,11 +62,14 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         header p {
-            color: #666;
+            color: var(--dark-text-color);
             font-size: 1.1em;
+            opacity: 0.8;
         }
 
         #reader-container {
@@ -65,6 +79,7 @@
             overflow: hidden;
             margin-bottom: 25px;
             position: relative;
+            border: 3px solid var(--primary-color);
         }
         
         #reader {
@@ -79,6 +94,12 @@
             box-shadow: var(--box-shadow);
             padding: 25px;
             margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
         }
         
         .label {
@@ -99,12 +120,20 @@
             width: 100%;
             padding: 12px;
             font-size: 1em;
-            border: 1px solid #ddd;
+            border: 1px solid #c8e6c9;
             border-radius: 8px;
             box-sizing: border-box;
             margin-bottom: 5px;
+            transition: border 0.3s ease;
+            background-color: #f1f8e9;
         }
 
+        .input-field:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+        }
+        
         .button {
             display: block;
             width: 100%;
@@ -116,23 +145,30 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .button:hover {
-            background-color: #218838;
+            background-color: #3d8b40;
             transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        
+        .button:active {
+            transform: translateY(0);
         }
         
         .button:disabled {
-            background-color: #a1a1a1;
+            background-color: #a5d6a7;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .button-secondary {
@@ -140,12 +176,25 @@
         }
 
         .button-secondary:hover {
-            background-color: #004494;
+            background-color: #1b5e20;
+        }
+
+        .button-tertiary {
+            background-color: var(--accent-color);
+            color: var(--dark-text-color);
+        }
+
+        .button-tertiary:hover {
+            background-color: #7cb342;
         }
 
         .member-info {
             text-align: left;
             margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f8e9;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
         }
 
         .member-photo {
@@ -155,15 +204,20 @@
             object-fit: cover;
             margin-bottom: 15px;
             border: 3px solid var(--primary-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .member-detail {
             margin-bottom: 8px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 6px;
         }
 
         .member-detail strong {
             display: inline-block;
             width: 100px;
+            color: var(--primary-color);
         }
 
         .hidden {
@@ -175,6 +229,43 @@
             font-size: 0.9em;
             margin-top: 5px;
             text-align: left;
+            padding: 8px;
+            background-color: #ffebee;
+            border-radius: 6px;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            font-size: 0.9em;
+            margin-top: 5px;
+            text-align: left;
+            padding: 8px;
+            background-color: #e8f5e9;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
         }
 
         .nav-tabs {
@@ -182,26 +273,57 @@
             justify-content: center;
             margin-bottom: 20px;
             gap: 10px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .nav-tab {
             padding: 10px 20px;
-            background-color: #e9ecef;
-            border-radius: 8px;
+            background-color: #e8f5e9;
+            border-radius: 30px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
+            color: var(--dark-text-color);
+            border: 2px solid transparent;
         }
 
         .nav-tab.active {
             background-color: var(--primary-color);
             color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background-color: #c8e6c9;
+        }
+
+        .benefit-badge {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         footer {
             margin-top: 30px;
-            color: #888;
+            color: var(--dark-text-color);
             font-size: 0.9em;
+            opacity: 0.8;
         }
 
         /* Penyesuaian untuk layar lebih kecil */
@@ -216,7 +338,16 @@
                 font-size: 1em;
             }
             .nav-tabs {
-                flex-direction: column;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 8px;
+                justify-content: flex-start;
+                border-radius: 12px;
+            }
+            .nav-tab {
+                white-space: nowrap;
+                padding: 8px 15px;
+                font-size: 0.9em;
             }
         }
     </style>
@@ -225,14 +356,15 @@
 
     <div class="main-container">
         <header>
-            <h1><i class="fas fa-crown"></i> Aplikasi VIP Dolan Sawah</h1>
-            <p>Manajemen Member VIP Restoran</p>
+            <h1><i class="fas fa-leaf"></i> Aplikasi VIP Dolan Sawah</h1>
+            <p>Manajemen Member VIP Restoran Organik</p>
         </header>
 
         <div class="nav-tabs">
-            <div class="nav-tab active" data-tab="scan">Scan QR Code</div>
-            <div class="nav-tab" data-tab="member">Member Area</div>
-            <div class="nav-tab" data-tab="add">Tambah Member</div>
+            <div class="nav-tab active" data-tab="scan"><i class="fas fa-qrcode"></i> Scan QR</div>
+            <div class="nav-tab" data-tab="member"><i class="fas fa-users"></i> Member</div>
+            <div class="nav-tab" data-tab="add"><i class="fas fa-user-plus"></i> Tambah</div>
+            <div class="nav-tab" data-tab="edit"><i class="fas fa-user-edit"></i> Edit</div>
         </div>
 
         <!-- Scan QR Code Tab -->
@@ -242,19 +374,19 @@
             </div>
             
             <div class="card">
-                <label class="label">Kode QR Hasil Pindaian</label>
+                <label class="label"><i class="fas fa-qrcode"></i> Hasil Pindaian QR Code</label>
                 <div id="result-display">Belum ada kode yang dipindai...</div>
-                <button id="action-button" class="button" disabled><i class="fas fa-copy"></i> Salin Kode & Buka Aplikasi</button>
+                <button id="copy-button" class="button button-tertiary"><i class="fas fa-copy"></i> Salin Kode</button>
             </div>
         </div>
 
         <!-- Member Area Tab -->
         <div id="member-tab" class="tab-content hidden">
             <div class="card">
-                <label class="label">ID Member</label>
+                <label class="label"><i class="fas fa-id-card"></i> ID Member</label>
                 <div class="input-group">
                     <input type="text" id="member-id-input" class="input-field" placeholder="Masukkan ID Member">
-                    <button id="paste-member-id" class="button button-secondary"><i class="fas fa-paste"></i> Paste dari Clipboard</button>
+                    <button id="paste-member-id" class="button button-secondary"><i class="fas fa-paste"></i> Paste ID</button>
                 </div>
                 
                 <div id="member-info-container" class="member-info hidden">
@@ -262,18 +394,18 @@
                     <div class="member-detail"><strong>Nama:</strong> <span id="member-name"></span></div>
                     <div class="member-detail"><strong>Alamat:</strong> <span id="member-address"></span></div>
                     <div class="member-detail"><strong>No. HP:</strong> <span id="member-phone"></span></div>
-                    <div class="member-detail"><strong>Poin:</strong> <span id="member-points"></span></div>
+                    <div class="member-detail"><strong>Poin:</strong> <span id="member-points"></span> <span class="benefit-badge">VIP</span></div>
                     
                     <div class="input-group">
-                        <label class="label">Nominal Transaksi</label>
+                        <label class="label"><i class="fas fa-money-bill-wave"></i> Nominal Transaksi</label>
                         <input type="number" id="transaction-amount" class="input-field" placeholder="Masukkan nominal transaksi (Rp)">
                         <div id="transaction-error" class="error-message hidden"></div>
-                        <button id="save-transaction" class="button"><i class="fas fa-save"></i> Simpan Transaksi</button>
+                        <button id="save-transaction" class="button"><i class="fas fa-coins"></i> Tambah Poin</button>
                     </div>
                 </div>
                 
                 <div id="member-not-found" class="error-message hidden">
-                    Member tidak ditemukan. Silakan coba lagi atau tambahkan member baru.
+                    <i class="fas fa-exclamation-circle"></i> Member tidak ditemukan. Silakan coba lagi atau tambahkan member baru.
                 </div>
             </div>
         </div>
@@ -281,43 +413,106 @@
         <!-- Add Member Tab -->
         <div id="add-tab" class="tab-content hidden">
             <div class="card">
-                <label class="label">ID Member Baru</label>
+                <h3 style="color: var(--primary-color); margin-top: 0; text-align: center;"><i class="fas fa-gift"></i> Dapatkan 10 Poin Gratis!</h3>
+                <p style="text-align: center; color: var(--dark-text-color); margin-bottom: 20px;">Untuk member baru pertama kali</p>
+                
+                <label class="label"><i class="fas fa-id-card"></i> ID Member Baru</label>
                 <div class="input-group">
                     <input type="text" id="new-member-id" class="input-field" placeholder="Masukkan ID Member baru">
-                    <button id="paste-new-member-id" class="button button-secondary"><i class="fas fa-paste"></i> Paste dari Clipboard</button>
+                    <button id="paste-new-member-id" class="button button-secondary"><i class="fas fa-paste"></i> Paste ID</button>
                 </div>
                 
                 <div class="input-group">
-                    <label class="label">Nama Lengkap</label>
+                    <label class="label"><i class="fas fa-user"></i> Nama Lengkap</label>
                     <input type="text" id="new-member-name" class="input-field" placeholder="Masukkan nama lengkap">
                 </div>
                 
                 <div class="input-group">
-                    <label class="label">Alamat</label>
+                    <label class="label"><i class="fas fa-map-marker-alt"></i> Alamat</label>
                     <input type="text" id="new-member-address" class="input-field" placeholder="Masukkan alamat">
                 </div>
                 
                 <div class="input-group">
-                    <label class="label">Nomor HP</label>
+                    <label class="label"><i class="fas fa-phone"></i> Nomor HP</label>
                     <input type="tel" id="new-member-phone" class="input-field" placeholder="Masukkan nomor HP">
                 </div>
                 
                 <div class="input-group">
-                    <label class="label">Foto Member (URL)</label>
+                    <label class="label"><i class="fas fa-camera"></i> Foto Member (URL)</label>
                     <input type="text" id="new-member-photo" class="input-field" placeholder="Masukkan URL foto">
+                    <small style="display: block; text-align: left; color: #666; margin-top: 5px;">Kosongkan untuk menggunakan foto default</small>
                 </div>
                 
-                <button id="save-member" class="button"><i class="fas fa-user-plus"></i> Simpan Member Baru</button>
+                <button id="save-member" class="button"><i class="fas fa-user-plus"></i> Daftarkan Member Baru</button>
                 <div id="add-member-error" class="error-message hidden"></div>
-                <div id="add-member-success" class="error-message" style="color: var(--secondary-color); display: none;">
-                    Member berhasil disimpan!
+                <div id="add-member-success" class="success-message hidden">
+                    <i class="fas fa-check-circle"></i> Member berhasil didaftarkan dengan 10 poin gratis!
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Member Tab -->
+        <div id="edit-tab" class="tab-content hidden">
+            <div class="card">
+                <label class="label"><i class="fas fa-search"></i> Cari Member</label>
+                <div class="input-group">
+                    <input type="text" id="edit-member-id" class="input-field" placeholder="Masukkan ID Member">
+                    <button id="search-member" class="button button-secondary"><i class="fas fa-search"></i> Cari</button>
+                </div>
+                
+                <div id="edit-member-info" class="hidden">
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-id-card"></i> ID Member</label>
+                        <input type="text" id="edit-member-id-display" class="input-field" readonly>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-user"></i> Nama Lengkap</label>
+                        <input type="text" id="edit-member-name" class="input-field" placeholder="Nama member">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-map-marker-alt"></i> Alamat</label>
+                        <input type="text" id="edit-member-address" class="input-field" placeholder="Alamat member">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-phone"></i> Nomor HP</label>
+                        <input type="tel" id="edit-member-phone" class="input-field" placeholder="Nomor HP member">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-camera"></i> Foto Member (URL)</label>
+                        <input type="text" id="edit-member-photo" class="input-field" placeholder="URL foto member">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-coins"></i> Poin Member</label>
+                        <input type="number" id="edit-member-points" class="input-field" placeholder="Poin member">
+                    </div>
+                    
+                    <button id="update-member" class="button"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                    <button id="delete-member" class="button" style="background-color: var(--error-color);"><i class="fas fa-trash"></i> Hapus Member</button>
+                    <div id="edit-member-error" class="error-message hidden"></div>
+                    <div id="edit-member-success" class="success-message hidden">
+                        <i class="fas fa-check-circle"></i> Data member berhasil diperbarui!
+                    </div>
+                </div>
+                
+                <div id="edit-member-not-found" class="error-message hidden">
+                    <i class="fas fa-exclamation-circle"></i> Member tidak ditemukan. Silakan coba ID yang lain.
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="notification" class="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">Kode berhasil disalin!</span>
+    </div>
+
     <footer>
-        &copy; 2025 Dolan Sawah Restaurant Group
+        &copy; 2025 Dolan Sawah Restaurant Group | <i class="fas fa-leaf"></i> Makanan Organik Berkualitas
     </footer>
 
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
@@ -330,21 +525,31 @@
             
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    // Remove active class from all tabs and contents
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.add('hidden'));
                     
-                    // Add active class to clicked tab and show corresponding content
                     tab.classList.add('active');
                     const tabId = tab.getAttribute('data-tab') + '-tab';
                     document.getElementById(tabId).classList.remove('hidden');
                 });
             });
 
+            // Notification system
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                const notificationText = document.getElementById('notification-text');
+                
+                notificationText.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
             // QR Code Scanner functionality
             const resultDisplay = document.getElementById('result-display');
-            const actionButton = document.getElementById('action-button');
-            const targetUrl = 'https://dewatalaptop.github.io/restaurant-vip-member/index.html';
+            const copyButton = document.getElementById('copy-button');
             let lastResult = '';
 
             function onScanSuccess(decodedText, decodedResult) {
@@ -359,7 +564,7 @@
                         // Not a URL
                     }
                     
-                    actionButton.disabled = false;
+                    copyButton.disabled = false;
                     console.log(`Scan Selesai: ${decodedText}`);
                 }
             }
@@ -385,22 +590,18 @@
             
             html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
-            actionButton.addEventListener('click', () => {
+            // Copy button functionality
+            copyButton.addEventListener('click', () => {
                 if (!lastResult) return;
 
                 navigator.clipboard.writeText(lastResult)
                     .then(() => {
                         console.log('Kode berhasil disalin ke clipboard:', lastResult);
-                        actionButton.innerHTML = '<i class="fas fa-check"></i> Kode Disalin!';
-                        window.open(targetUrl, '_blank');
-                        
-                        setTimeout(() => {
-                            actionButton.innerHTML = '<i class="fas fa-copy"></i> Salin Kode & Buka Aplikasi';
-                        }, 2000);
+                        showNotification('Kode berhasil disalin ke clipboard!');
                     })
                     .catch(err => {
                         console.error('Gagal menyalin teks: ', err);
-                        alert('Gagal menyalin kode. Pastikan situs ini berjalan di HTTPS.');
+                        showNotification('Gagal menyalin kode. Pastikan HTTPS!');
                     });
             });
 
@@ -426,7 +627,7 @@
                     loadMemberData(text);
                 } catch (err) {
                     console.error('Failed to read clipboard contents: ', err);
-                    alert('Gagal membaca clipboard. Pastikan situs ini berjalan di HTTPS dan Anda memberikan izin akses clipboard.');
+                    showNotification('Gagal membaca clipboard. Pastikan HTTPS!');
                 }
             });
 
@@ -437,7 +638,7 @@
                 
                 if (member) {
                     // Display member info
-                    memberPhoto.src = member.photo || 'https://via.placeholder.com/100';
+                    memberPhoto.src = member.photo || 'https://via.placeholder.com/100?text=Member';
                     memberName.textContent = member.name || '-';
                     memberAddress.textContent = member.address || '-';
                     memberPhone.textContent = member.phone || '-';
@@ -483,7 +684,7 @@
                     memberPoints.textContent = members[memberId].points;
                     transactionAmount.value = '';
                     
-                    alert(`Transaksi berhasil dicatat! Member mendapatkan ${pointsToAdd} poin.`);
+                    showNotification(`Transaksi Rp${amount.toLocaleString()} berhasil! +${pointsToAdd} poin`);
                 } else {
                     transactionError.textContent = 'Member tidak ditemukan';
                     transactionError.classList.remove('hidden');
@@ -508,11 +709,11 @@
                     newMemberId.value = text;
                 } catch (err) {
                     console.error('Failed to read clipboard contents: ', err);
-                    alert('Gagal membaca clipboard. Pastikan situs ini berjalan di HTTPS dan Anda memberikan izin akses clipboard.');
+                    showNotification('Gagal membaca clipboard. Pastikan HTTPS!');
                 }
             });
 
-            // Save new member
+            // Save new member with 10 points bonus
             saveMemberBtn.addEventListener('click', () => {
                 const memberId = newMemberId.value.trim();
                 const name = newMemberName.value.trim();
@@ -535,7 +736,7 @@
                 
                 addMemberError.classList.add('hidden');
                 
-                // Save to localStorage
+                // Save to localStorage with 10 points bonus
                 const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
                 
                 if (members[memberId]) {
@@ -548,23 +749,141 @@
                     name,
                     address,
                     phone,
-                    photo: photo || 'https://via.placeholder.com/100',
-                    points: 0
+                    photo: photo || 'https://via.placeholder.com/100?text=Member',
+                    points: 10 // 10 points bonus for new members
                 };
                 
                 localStorage.setItem('vipMembers', JSON.stringify(members));
                 
                 // Show success message and clear form
-                addMemberSuccess.style.display = 'block';
+                addMemberSuccess.classList.remove('hidden');
                 setTimeout(() => {
-                    addMemberSuccess.style.display = 'none';
-                }, 3000);
+                    addMemberSuccess.classList.add('hidden');
+                }, 5000);
                 
                 newMemberId.value = '';
                 newMemberName.value = '';
                 newMemberAddress.value = '';
                 newMemberPhone.value = '';
                 newMemberPhoto.value = '';
+                
+                showNotification(`Member baru berhasil didaftarkan! 10 poin gratis diberikan.`);
+            });
+
+            // Edit Member functionality
+            const editMemberId = document.getElementById('edit-member-id');
+            const searchMemberBtn = document.getElementById('search-member');
+            const editMemberInfo = document.getElementById('edit-member-info');
+            const editMemberNotFound = document.getElementById('edit-member-not-found');
+            const editMemberIdDisplay = document.getElementById('edit-member-id-display');
+            const editMemberName = document.getElementById('edit-member-name');
+            const editMemberAddress = document.getElementById('edit-member-address');
+            const editMemberPhone = document.getElementById('edit-member-phone');
+            const editMemberPhoto = document.getElementById('edit-member-photo');
+            const editMemberPoints = document.getElementById('edit-member-points');
+            const updateMemberBtn = document.getElementById('update-member');
+            const deleteMemberBtn = document.getElementById('delete-member');
+            const editMemberError = document.getElementById('edit-member-error');
+            const editMemberSuccess = document.getElementById('edit-member-success');
+
+            // Search member
+            searchMemberBtn.addEventListener('click', () => {
+                const memberId = editMemberId.value.trim();
+                
+                if (!memberId) {
+                    editMemberError.textContent = 'Masukkan ID Member yang valid';
+                    editMemberError.classList.remove('hidden');
+                    return;
+                }
+                
+                const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                const member = members[memberId];
+                
+                if (member) {
+                    // Display member info in edit form
+                    editMemberIdDisplay.value = memberId;
+                    editMemberName.value = member.name || '';
+                    editMemberAddress.value = member.address || '';
+                    editMemberPhone.value = member.phone || '';
+                    editMemberPhoto.value = member.photo || '';
+                    editMemberPoints.value = member.points || '0';
+                    
+                    editMemberInfo.classList.remove('hidden');
+                    editMemberNotFound.classList.add('hidden');
+                    editMemberError.classList.add('hidden');
+                } else {
+                    editMemberInfo.classList.add('hidden');
+                    editMemberNotFound.classList.remove('hidden');
+                }
+            });
+
+            // Update member
+            updateMemberBtn.addEventListener('click', () => {
+                const memberId = editMemberIdDisplay.value;
+                const name = editMemberName.value.trim();
+                const address = editMemberAddress.value.trim();
+                const phone = editMemberPhone.value.trim();
+                const photo = editMemberPhoto.value.trim();
+                const points = parseInt(editMemberPoints.value) || 0;
+                
+                if (!name) {
+                    editMemberError.textContent = 'Nama member harus diisi';
+                    editMemberError.classList.remove('hidden');
+                    return;
+                }
+                
+                const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                
+                if (members[memberId]) {
+                    members[memberId] = {
+                        name,
+                        address,
+                        phone,
+                        photo: photo || 'https://via.placeholder.com/100?text=Member',
+                        points
+                    };
+                    
+                    localStorage.setItem('vipMembers', JSON.stringify(members));
+                    
+                    editMemberSuccess.classList.remove('hidden');
+                    setTimeout(() => {
+                        editMemberSuccess.classList.add('hidden');
+                    }, 3000);
+                    
+                    showNotification('Data member berhasil diperbarui!');
+                } else {
+                    editMemberError.textContent = 'Member tidak ditemukan';
+                    editMemberError.classList.remove('hidden');
+                }
+            });
+
+            // Delete member
+            deleteMemberBtn.addEventListener('click', () => {
+                const memberId = editMemberIdDisplay.value;
+                
+                if (!memberId) {
+                    editMemberError.textContent = 'Tidak ada member yang dipilih';
+                    editMemberError.classList.remove('hidden');
+                    return;
+                }
+                
+                if (confirm(`Apakah Anda yakin ingin menghapus member ${memberId}?`)) {
+                    const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                    delete members[memberId];
+                    localStorage.setItem('vipMembers', JSON.stringify(members));
+                    
+                    // Clear form
+                    editMemberId.value = '';
+                    editMemberInfo.classList.add('hidden');
+                    editMemberIdDisplay.value = '';
+                    editMemberName.value = '';
+                    editMemberAddress.value = '';
+                    editMemberPhone.value = '';
+                    editMemberPhoto.value = '';
+                    editMemberPoints.value = '0';
+                    
+                    showNotification(`Member ${memberId} berhasil dihapus!`);
+                }
             });
         });
     </script>
