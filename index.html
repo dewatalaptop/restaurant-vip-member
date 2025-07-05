@@ -319,6 +319,82 @@
             100% { transform: scale(1); }
         }
 
+        .benefit-item {
+            display: inline-block;
+            background-color: #e8f5e9;
+            color: var(--dark-text-color);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .camera-container {
+            width: 100%;
+            height: 200px;
+            background-color: #f1f8e9;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 2px dashed #c8e6c9;
+        }
+
+        #camera-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #capture-btn {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #capture-btn:hover {
+            background-color: #1b5e20;
+        }
+
+        .photo-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .photo-option-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #c8e6c9;
+            background-color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 0.9em;
+        }
+
+        .photo-option-btn:hover {
+            background-color: #f1f8e9;
+        }
+
         footer {
             margin-top: 30px;
             color: var(--dark-text-color);
@@ -395,6 +471,7 @@
                     <div class="member-detail"><strong>Alamat:</strong> <span id="member-address"></span></div>
                     <div class="member-detail"><strong>No. HP:</strong> <span id="member-phone"></span></div>
                     <div class="member-detail"><strong>Poin:</strong> <span id="member-points"></span> <span class="benefit-badge">VIP</span></div>
+                    <div class="member-detail"><strong>Benefit:</strong> <div id="member-benefits"></div></div>
                     
                     <div class="input-group">
                         <label class="label"><i class="fas fa-money-bill-wave"></i> Nominal Transaksi</label>
@@ -438,9 +515,26 @@
                 </div>
                 
                 <div class="input-group">
-                    <label class="label"><i class="fas fa-camera"></i> Foto Member (URL)</label>
-                    <input type="text" id="new-member-photo" class="input-field" placeholder="Masukkan URL foto">
-                    <small style="display: block; text-align: left; color: #666; margin-top: 5px;">Kosongkan untuk menggunakan foto default</small>
+                    <label class="label"><i class="fas fa-camera"></i> Foto Member</label>
+                    <div class="camera-container">
+                        <video id="camera-preview" autoplay playsinline></video>
+                        <button id="capture-btn" class="hidden"><i class="fas fa-camera"></i></button>
+                    </div>
+                    <div class="photo-options">
+                        <button id="start-camera" class="photo-option-btn"><i class="fas fa-camera"></i> Ambil Foto</button>
+                        <button id="upload-photo" class="photo-option-btn"><i class="fas fa-upload"></i> Upload</button>
+                        <input type="file" id="photo-upload" accept="image/*" class="hidden">
+                    </div>
+                    <canvas id="photo-canvas" class="hidden"></canvas>
+                </div>
+                
+                <div class="input-group">
+                    <label class="label"><i class="fas fa-star"></i> Benefit Member</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="new-benefit-input" class="input-field" placeholder="Masukkan benefit" style="flex: 1;">
+                        <button id="add-benefit" class="button" style="width: auto; padding: 0 15px;"><i class="fas fa-plus"></i> Tambah</button>
+                    </div>
+                    <div id="benefits-container" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
                 </div>
                 
                 <button id="save-member" class="button"><i class="fas fa-user-plus"></i> Daftarkan Member Baru</button>
@@ -482,13 +576,32 @@
                     </div>
                     
                     <div class="input-group">
-                        <label class="label"><i class="fas fa-camera"></i> Foto Member (URL)</label>
-                        <input type="text" id="edit-member-photo" class="input-field" placeholder="URL foto member">
+                        <label class="label"><i class="fas fa-camera"></i> Foto Member</label>
+                        <img id="edit-member-photo-preview" src="" class="member-photo" style="margin-bottom: 10px;">
+                        <div class="camera-container">
+                            <video id="edit-camera-preview" autoplay playsinline class="hidden"></video>
+                            <button id="edit-capture-btn" class="hidden"><i class="fas fa-camera"></i></button>
+                        </div>
+                        <div class="photo-options">
+                            <button id="edit-start-camera" class="photo-option-btn"><i class="fas fa-camera"></i> Ambil Foto Baru</button>
+                            <button id="edit-upload-photo" class="photo-option-btn"><i class="fas fa-upload"></i> Upload</button>
+                            <input type="file" id="edit-photo-upload" accept="image/*" class="hidden">
+                        </div>
+                        <canvas id="edit-photo-canvas" class="hidden"></canvas>
                     </div>
                     
                     <div class="input-group">
                         <label class="label"><i class="fas fa-coins"></i> Poin Member</label>
                         <input type="number" id="edit-member-points" class="input-field" placeholder="Poin member">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-star"></i> Benefit Member</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="edit-benefit-input" class="input-field" placeholder="Masukkan benefit" style="flex: 1;">
+                            <button id="edit-add-benefit" class="button" style="width: auto; padding: 0 15px;"><i class="fas fa-plus"></i> Tambah</button>
+                        </div>
+                        <div id="edit-benefits-container" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
                     </div>
                     
                     <button id="update-member" class="button"><i class="fas fa-save"></i> Simpan Perubahan</button>
@@ -531,6 +644,12 @@
                     tab.classList.add('active');
                     const tabId = tab.getAttribute('data-tab') + '-tab';
                     document.getElementById(tabId).classList.remove('hidden');
+                    
+                    // Stop camera when leaving camera tabs
+                    if (tabId !== 'add-tab' && tabId !== 'edit-tab') {
+                        stopCamera();
+                        stopEditCamera();
+                    }
                 });
             });
 
@@ -615,6 +734,7 @@
             const memberAddress = document.getElementById('member-address');
             const memberPhone = document.getElementById('member-phone');
             const memberPoints = document.getElementById('member-points');
+            const memberBenefits = document.getElementById('member-benefits');
             const transactionAmount = document.getElementById('transaction-amount');
             const saveTransactionBtn = document.getElementById('save-transaction');
             const transactionError = document.getElementById('transaction-error');
@@ -638,11 +758,28 @@
                 
                 if (member) {
                     // Display member info
-                    memberPhoto.src = member.photo || 'https://via.placeholder.com/100?text=Member';
+                    if (member.photo && member.photo.startsWith('data:image')) {
+                        memberPhoto.src = member.photo;
+                    } else {
+                        memberPhoto.src = member.photo || 'https://via.placeholder.com/100?text=Member';
+                    }
                     memberName.textContent = member.name || '-';
                     memberAddress.textContent = member.address || '-';
                     memberPhone.textContent = member.phone || '-';
                     memberPoints.textContent = member.points || '0';
+                    
+                    // Display benefits
+                    memberBenefits.innerHTML = '';
+                    if (member.benefits && member.benefits.length > 0) {
+                        member.benefits.forEach(benefit => {
+                            const span = document.createElement('span');
+                            span.className = 'benefit-item';
+                            span.textContent = benefit;
+                            memberBenefits.appendChild(span);
+                        });
+                    } else {
+                        memberBenefits.textContent = 'Tidak ada benefit khusus';
+                    }
                     
                     memberInfoContainer.classList.remove('hidden');
                     memberNotFound.classList.add('hidden');
@@ -691,16 +828,96 @@
                 }
             });
 
-            // Add New Member functionality
+            // Camera functionality for adding new member
+            const cameraPreview = document.getElementById('camera-preview');
+            const captureBtn = document.getElementById('capture-btn');
+            const startCameraBtn = document.getElementById('start-camera');
+            const uploadPhotoBtn = document.getElementById('upload-photo');
+            const photoUpload = document.getElementById('photo-upload');
+            const photoCanvas = document.getElementById('photo-canvas');
+            let stream = null;
+
+            // Start camera
+            startCameraBtn.addEventListener('click', async () => {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    cameraPreview.srcObject = stream;
+                    captureBtn.classList.remove('hidden');
+                    startCameraBtn.disabled = true;
+                    uploadPhotoBtn.disabled = true;
+                } catch (err) {
+                    console.error('Error accessing camera:', err);
+                    showNotification('Gagal mengakses kamera. Pastikan izin diberikan.');
+                }
+            });
+
+            // Capture photo
+            captureBtn.addEventListener('click', () => {
+                photoCanvas.width = cameraPreview.videoWidth;
+                photoCanvas.height = cameraPreview.videoHeight;
+                const ctx = photoCanvas.getContext('2d');
+                ctx.drawImage(cameraPreview, 0, 0, photoCanvas.width, photoCanvas.height);
+                
+                // Stop camera
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+                
+                cameraPreview.srcObject = null;
+                captureBtn.classList.add('hidden');
+                startCameraBtn.disabled = false;
+                uploadPhotoBtn.disabled = false;
+            });
+
+            // Upload photo
+            uploadPhotoBtn.addEventListener('click', () => {
+                photoUpload.click();
+            });
+
+            photoUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            photoCanvas.width = img.width;
+                            photoCanvas.height = img.height;
+                            const ctx = photoCanvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Stop camera function
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+                cameraPreview.srcObject = null;
+                captureBtn.classList.add('hidden');
+                startCameraBtn.disabled = false;
+                uploadPhotoBtn.disabled = false;
+            }
+
+            // Add New Member functionality with benefits
             const newMemberId = document.getElementById('new-member-id');
             const pasteNewMemberId = document.getElementById('paste-new-member-id');
             const newMemberName = document.getElementById('new-member-name');
             const newMemberAddress = document.getElementById('new-member-address');
             const newMemberPhone = document.getElementById('new-member-phone');
-            const newMemberPhoto = document.getElementById('new-member-photo');
             const saveMemberBtn = document.getElementById('save-member');
             const addMemberError = document.getElementById('add-member-error');
             const addMemberSuccess = document.getElementById('add-member-success');
+            const newBenefitInput = document.getElementById('new-benefit-input');
+            const addBenefitBtn = document.getElementById('add-benefit');
+            const benefitsContainer = document.getElementById('benefits-container');
+            let benefits = [];
 
             // Paste New Member ID button
             pasteNewMemberId.addEventListener('click', async () => {
@@ -713,13 +930,46 @@
                 }
             });
 
-            // Save new member with 10 points bonus
+            // Add benefit
+            addBenefitBtn.addEventListener('click', () => {
+                const benefit = newBenefitInput.value.trim();
+                if (benefit) {
+                    benefits.push(benefit);
+                    renderBenefits();
+                    newBenefitInput.value = '';
+                }
+            });
+
+            function renderBenefits() {
+                benefitsContainer.innerHTML = '';
+                benefits.forEach((benefit, index) => {
+                    const span = document.createElement('span');
+                    span.className = 'benefit-item';
+                    span.textContent = benefit;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.style.marginLeft = '5px';
+                    removeBtn.style.background = 'none';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.style.color = 'var(--error-color)';
+                    removeBtn.addEventListener('click', () => {
+                        benefits.splice(index, 1);
+                        renderBenefits();
+                    });
+                    
+                    span.appendChild(removeBtn);
+                    benefitsContainer.appendChild(span);
+                });
+            }
+
+            // Save new member with 10 points bonus and photo
             saveMemberBtn.addEventListener('click', () => {
                 const memberId = newMemberId.value.trim();
                 const name = newMemberName.value.trim();
                 const address = newMemberAddress.value.trim();
                 const phone = newMemberPhone.value.trim();
-                const photo = newMemberPhoto.value.trim();
                 
                 // Validation
                 if (!memberId) {
@@ -736,6 +986,12 @@
                 
                 addMemberError.classList.add('hidden');
                 
+                // Get photo data
+                let photoData = '';
+                if (photoCanvas.width > 0) {
+                    photoData = photoCanvas.toDataURL('image/jpeg', 0.8);
+                }
+                
                 // Save to localStorage with 10 points bonus
                 const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
                 
@@ -749,8 +1005,9 @@
                     name,
                     address,
                     phone,
-                    photo: photo || 'https://via.placeholder.com/100?text=Member',
-                    points: 10 // 10 points bonus for new members
+                    photo: photoData || 'https://via.placeholder.com/100?text=Member',
+                    points: 10, // 10 points bonus for new members
+                    benefits: [...benefits] // Copy benefits array
                 };
                 
                 localStorage.setItem('vipMembers', JSON.stringify(members));
@@ -761,11 +1018,16 @@
                     addMemberSuccess.classList.add('hidden');
                 }, 5000);
                 
+                // Reset form
                 newMemberId.value = '';
                 newMemberName.value = '';
                 newMemberAddress.value = '';
                 newMemberPhone.value = '';
-                newMemberPhoto.value = '';
+                benefits = [];
+                renderBenefits();
+                photoCanvas.width = 0;
+                photoCanvas.height = 0;
+                stopCamera();
                 
                 showNotification(`Member baru berhasil didaftarkan! 10 poin gratis diberikan.`);
             });
@@ -779,12 +1041,23 @@
             const editMemberName = document.getElementById('edit-member-name');
             const editMemberAddress = document.getElementById('edit-member-address');
             const editMemberPhone = document.getElementById('edit-member-phone');
-            const editMemberPhoto = document.getElementById('edit-member-photo');
+            const editMemberPhotoPreview = document.getElementById('edit-member-photo-preview');
             const editMemberPoints = document.getElementById('edit-member-points');
             const updateMemberBtn = document.getElementById('update-member');
             const deleteMemberBtn = document.getElementById('delete-member');
             const editMemberError = document.getElementById('edit-member-error');
             const editMemberSuccess = document.getElementById('edit-member-success');
+            const editCameraPreview = document.getElementById('edit-camera-preview');
+            const editCaptureBtn = document.getElementById('edit-capture-btn');
+            const editStartCameraBtn = document.getElementById('edit-start-camera');
+            const editUploadPhotoBtn = document.getElementById('edit-upload-photo');
+            const editPhotoUpload = document.getElementById('edit-photo-upload');
+            const editPhotoCanvas = document.getElementById('edit-photo-canvas');
+            const editBenefitInput = document.getElementById('edit-benefit-input');
+            const editAddBenefitBtn = document.getElementById('edit-add-benefit');
+            const editBenefitsContainer = document.getElementById('edit-benefits-container');
+            let editStream = null;
+            let editBenefits = [];
 
             // Search member
             searchMemberBtn.addEventListener('click', () => {
@@ -805,8 +1078,18 @@
                     editMemberName.value = member.name || '';
                     editMemberAddress.value = member.address || '';
                     editMemberPhone.value = member.phone || '';
-                    editMemberPhoto.value = member.photo || '';
+                    
+                    if (member.photo && member.photo.startsWith('data:image')) {
+                        editMemberPhotoPreview.src = member.photo;
+                    } else {
+                        editMemberPhotoPreview.src = member.photo || 'https://via.placeholder.com/100?text=Member';
+                    }
+                    
                     editMemberPoints.value = member.points || '0';
+                    
+                    // Display benefits
+                    editBenefits = member.benefits || [];
+                    renderEditBenefits();
                     
                     editMemberInfo.classList.remove('hidden');
                     editMemberNotFound.classList.add('hidden');
@@ -817,13 +1100,109 @@
                 }
             });
 
+            // Edit camera functions
+            editStartCameraBtn.addEventListener('click', async () => {
+                try {
+                    editStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    editCameraPreview.srcObject = editStream;
+                    editCaptureBtn.classList.remove('hidden');
+                    editStartCameraBtn.disabled = true;
+                    editUploadPhotoBtn.disabled = true;
+                    editCameraPreview.classList.remove('hidden');
+                } catch (err) {
+                    console.error('Error accessing camera:', err);
+                    showNotification('Gagal mengakses kamera. Pastikan izin diberikan.');
+                }
+            });
+
+            editCaptureBtn.addEventListener('click', () => {
+                editPhotoCanvas.width = editCameraPreview.videoWidth;
+                editPhotoCanvas.height = editCameraPreview.videoHeight;
+                const ctx = editPhotoCanvas.getContext('2d');
+                ctx.drawImage(editCameraPreview, 0, 0, editPhotoCanvas.width, editPhotoCanvas.height);
+                
+                // Update preview
+                editMemberPhotoPreview.src = editPhotoCanvas.toDataURL('image/jpeg', 0.8);
+                
+                // Stop camera
+                stopEditCamera();
+            });
+
+            editUploadPhotoBtn.addEventListener('click', () => {
+                editPhotoUpload.click();
+            });
+
+            editPhotoUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            editPhotoCanvas.width = img.width;
+                            editPhotoCanvas.height = img.height;
+                            const ctx = editPhotoCanvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            editMemberPhotoPreview.src = editPhotoCanvas.toDataURL('image/jpeg', 0.8);
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            function stopEditCamera() {
+                if (editStream) {
+                    editStream.getTracks().forEach(track => track.stop());
+                    editStream = null;
+                }
+                editCameraPreview.srcObject = null;
+                editCaptureBtn.classList.add('hidden');
+                editStartCameraBtn.disabled = false;
+                editUploadPhotoBtn.disabled = false;
+                editCameraPreview.classList.add('hidden');
+            }
+
+            // Edit benefit functions
+            editAddBenefitBtn.addEventListener('click', () => {
+                const benefit = editBenefitInput.value.trim();
+                if (benefit) {
+                    editBenefits.push(benefit);
+                    renderEditBenefits();
+                    editBenefitInput.value = '';
+                }
+            });
+
+            function renderEditBenefits() {
+                editBenefitsContainer.innerHTML = '';
+                editBenefits.forEach((benefit, index) => {
+                    const span = document.createElement('span');
+                    span.className = 'benefit-item';
+                    span.textContent = benefit;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.style.marginLeft = '5px';
+                    removeBtn.style.background = 'none';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.style.color = 'var(--error-color)';
+                    removeBtn.addEventListener('click', () => {
+                        editBenefits.splice(index, 1);
+                        renderEditBenefits();
+                    });
+                    
+                    span.appendChild(removeBtn);
+                    editBenefitsContainer.appendChild(span);
+                });
+            }
+
             // Update member
             updateMemberBtn.addEventListener('click', () => {
                 const memberId = editMemberIdDisplay.value;
                 const name = editMemberName.value.trim();
                 const address = editMemberAddress.value.trim();
                 const phone = editMemberPhone.value.trim();
-                const photo = editMemberPhoto.value.trim();
                 const points = parseInt(editMemberPoints.value) || 0;
                 
                 if (!name) {
@@ -835,12 +1214,19 @@
                 const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
                 
                 if (members[memberId]) {
+                    // Get photo data (use existing if no new photo taken)
+                    let photoData = members[memberId].photo;
+                    if (editPhotoCanvas.width > 0) {
+                        photoData = editPhotoCanvas.toDataURL('image/jpeg', 0.8);
+                    }
+                    
                     members[memberId] = {
                         name,
                         address,
                         phone,
-                        photo: photo || 'https://via.placeholder.com/100?text=Member',
-                        points
+                        photo: photoData,
+                        points,
+                        benefits: [...editBenefits]
                     };
                     
                     localStorage.setItem('vipMembers', JSON.stringify(members));
@@ -879,8 +1265,12 @@
                     editMemberName.value = '';
                     editMemberAddress.value = '';
                     editMemberPhone.value = '';
-                    editMemberPhoto.value = '';
                     editMemberPoints.value = '0';
+                    editBenefits = [];
+                    renderEditBenefits();
+                    editPhotoCanvas.width = 0;
+                    editPhotoCanvas.height = 0;
+                    stopEditCamera();
                     
                     showNotification(`Member ${memberId} berhasil dihapus!`);
                 }
