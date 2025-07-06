@@ -861,7 +861,7 @@
                 html5QrcodeScanner.render(onScanSuccess, onScanFailure);
             }
 
-            // QR Code Scanner callbacks
+            // QR Code Scanner callbacks - MODIFIED TO AUTO-SWITCH TABS AND COPY ID
             function onScanSuccess(decodedText, decodedResult) {
                 if (decodedText !== lastResult) {
                     lastResult = decodedText;
@@ -878,11 +878,34 @@
                     
                     document.getElementById('copy-button').disabled = false;
                     console.log(`Scan Selesai: ${decodedText}`);
+                    
+                    // Auto-copy the scanned code to clipboard
+                    copyToClipboard(decodedText);
+                    
+                    // Auto-switch to member tab and paste the ID
+                    setTimeout(() => {
+                        document.querySelector('.nav-tab[data-tab="member"]').click();
+                        document.getElementById('member-id-input').value = decodedText;
+                        loadMemberData(decodedText);
+                    }, 500);
                 }
             }
 
             function onScanFailure(error) {
                 console.log('QR Scan error:', error);
+            }
+
+            // Helper function to copy text to clipboard
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        console.log('Kode berhasil disalin ke clipboard:', text);
+                        showNotification('Kode berhasil disalin ke clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Gagal menyalin teks: ', err);
+                        showNotification('Gagal menyalin kode. Pastikan HTTPS!', 'error');
+                    });
             }
 
             // Notification system
@@ -914,16 +937,7 @@
             // Copy button functionality
             document.getElementById('copy-button').addEventListener('click', () => {
                 if (!lastResult) return;
-
-                navigator.clipboard.writeText(lastResult)
-                    .then(() => {
-                        console.log('Kode berhasil disalin ke clipboard:', lastResult);
-                        showNotification('Kode berhasil disalin ke clipboard!');
-                    })
-                    .catch(err => {
-                        console.error('Gagal menyalin teks: ', err);
-                        showNotification('Gagal menyalin kode. Pastikan HTTPS!', 'error');
-                    });
+                copyToClipboard(lastResult);
             });
 
             // Member Area functionality
@@ -1147,11 +1161,13 @@
             const addBenefitBtn = document.getElementById('add-benefit');
             const benefitsContainer = document.getElementById('benefits-container');
 
-            // Paste New Member ID button
+            // Paste New Member ID button - MODIFIED TO AUTO-SWITCH FROM SCAN TAB
             pasteNewMemberId.addEventListener('click', async () => {
                 try {
                     const text = await navigator.clipboard.readText();
                     newMemberId.value = text;
+                    // Auto-focus to next field for better UX
+                    newMemberName.focus();
                 } catch (err) {
                     console.error('Failed to read clipboard contents: ', err);
                     showNotification('Gagal membaca clipboard. Pastikan HTTPS!', 'error');
@@ -1326,7 +1342,7 @@
             const editAddBenefitBtn = document.getElementById('edit-add-benefit');
             const editBenefitsContainer = document.getElementById('edit-benefits-container');
 
-            // Search member
+            // Search member - MODIFIED TO AUTO-SWITCH FROM SCAN TAB
             searchMemberBtn.addEventListener('click', () => {
                 const memberId = editMemberId.value.trim();
                 
