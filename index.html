@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi VIP member Dolan Sawah</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
     <style>
         :root {
             --primary-color: #2e7d32;
@@ -19,13 +21,6 @@
             --box-shadow: 0 6px 20px rgba(46, 125, 50, 0.15);
             --error-color: #c62828;
             --success-color: #2e7d32;
-            --warning-color: #ff8f00;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
@@ -40,7 +35,6 @@
             min-height: 100vh;
             color: var(--dark-text-color);
             background-image: linear-gradient(to bottom right, #e8f5e9, #c8e6c9);
-            line-height: 1.6;
         }
 
         .main-container {
@@ -61,7 +55,7 @@
         }
 
         header h1 {
-            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-size: 2em;
             color: var(--primary-color);
             font-weight: 700;
             display: flex;
@@ -74,7 +68,7 @@
         
         header p {
             color: var(--dark-text-color);
-            font-size: clamp(1rem, 3vw, 1.1rem);
+            font-size: 1.1em;
             opacity: 0.8;
         }
 
@@ -86,14 +80,17 @@
             margin-bottom: 25px;
             position: relative;
             border: 3px solid var(--primary-color);
-            aspect-ratio: 1;
+            min-height: 300px;
         }
         
         #reader {
             width: 100%;
             height: 100%;
-            border: none;
-            display: block;
+        }
+
+        #manual-input-section {
+            display: none;
+            margin-top: 20px;
         }
 
         .card {
@@ -103,12 +100,11 @@
             padding: 25px;
             margin-bottom: 20px;
             border-left: 5px solid var(--primary-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(46, 125, 50, 0.2);
         }
         
         .label {
@@ -127,21 +123,20 @@
 
         .input-field {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px;
             font-size: 1em;
             border: 1px solid #c8e6c9;
             border-radius: 8px;
             box-sizing: border-box;
             margin-bottom: 5px;
-            transition: all 0.3s ease;
+            transition: border 0.3s ease;
             background-color: #f1f8e9;
         }
 
         .input-field:focus {
             border-color: var(--primary-color);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
-            background-color: white;
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
         }
         
         .button {
@@ -172,7 +167,6 @@
         
         .button:active {
             transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .button:disabled {
@@ -180,118 +174,6 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
-            opacity: 0.7;
-        }
-
-        .button-secondary {
-            background-color: var(--primary-color);
-        }
-
-        .button-secondary:hover {
-            background-color: #1b5e20;
-        }
-
-        .button-tertiary {
-            background-color: var(--accent-color);
-            color: var(--dark-text-color);
-        }
-
-        .button-tertiary:hover {
-            background-color: #7cb342;
-        }
-
-        .button-danger {
-            background-color: var(--error-color);
-        }
-
-        .button-danger:hover {
-            background-color: #b71c1c;
-        }
-
-        .member-info {
-            text-align: left;
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f1f8e9;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .member-photo {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 0 auto 15px;
-            display: block;
-            border: 3px solid var(--primary-color);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            background-color: #fff;
-        }
-
-        .member-detail {
-            margin-bottom: 8px;
-            padding: 10px;
-            background-color: white;
-            border-radius: 6px;
-            font-size: 0.95em;
-        }
-
-        .member-detail strong {
-            display: inline-block;
-            width: 100px;
-            color: var(--primary-color);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .error-message {
-            color: var(--error-color);
-            font-size: 0.9em;
-            margin-top: 5px;
-            text-align: left;
-            padding: 10px;
-            background-color: #ffebee;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            animation: shake 0.5s ease;
-        }
-
-        .success-message {
-            color: var(--success-color);
-            font-size: 0.9em;
-            margin-top: 5px;
-            text-align: left;
-            padding: 10px;
-            background-color: #e8f5e9;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .warning-message {
-            color: var(--warning-color);
-            font-size: 0.9em;
-            margin-top: 5px;
-            text-align: left;
-            padding: 10px;
-            background-color: #fff8e1;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
         }
 
         .notification {
@@ -309,35 +191,29 @@
             gap: 10px;
             transform: translateX(200%);
             transition: transform 0.3s ease;
-            max-width: 90%;
         }
 
         .notification.show {
             transform: translateX(0);
         }
 
-        .notification.error {
-            background-color: var(--error-color);
-        }
-
-        .notification.warning {
-            background-color: var(--warning-color);
+        .hidden {
+            display: none;
         }
 
         .nav-tabs {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
-            gap: 8px;
+            gap: 10px;
             background-color: white;
             padding: 10px;
             border-radius: 50px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            flex-wrap: wrap;
         }
 
         .nav-tab {
-            padding: 10px 15px;
+            padding: 10px 20px;
             background-color: #e8f5e9;
             border-radius: 30px;
             cursor: pointer;
@@ -345,8 +221,6 @@
             transition: all 0.3s ease;
             color: var(--dark-text-color);
             border: 2px solid transparent;
-            font-size: 0.9em;
-            white-space: nowrap;
         }
 
         .nav-tab.active {
@@ -356,229 +230,27 @@
             box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
         }
 
-        .nav-tab:hover:not(.active) {
-            background-color: #c8e6c9;
-        }
-
-        .benefit-badge {
-            display: inline-block;
-            background-color: var(--accent-color);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: bold;
-            margin-left: 5px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .benefit-item {
-            display: inline-flex;
-            align-items: center;
-            background-color: #e8f5e9;
-            color: var(--dark-text-color);
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            margin-right: 5px;
-            margin-bottom: 5px;
-            border: 1px solid #c8e6c9;
-            transition: all 0.2s ease;
-        }
-
-        .benefit-item:hover {
-            background-color: #dcedc8;
-        }
-
-        .benefit-item button {
-            background: none;
-            border: none;
-            color: var(--error-color);
-            cursor: pointer;
-            margin-left: 5px;
-            font-size: 1.1em;
-            line-height: 1;
-            padding: 0 0 0 5px;
-        }
-
-        .empty-state {
-            color: #757575;
-            font-size: 0.9em;
-            padding: 10px;
-            text-align: center;
-            background-color: #f5f5f5;
-            border-radius: 6px;
-            margin: 5px 0;
-        }
-
-        .camera-container {
-            width: 100%;
-            height: 0;
-            padding-bottom: 75%; /* 4:3 Aspect Ratio */
-            background-color: #f1f8e9;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            position: relative;
-            border: 2px dashed #c8e6c9;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23c8e6c9"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 50px;
-        }
-
-        #camera-preview, #edit-camera-preview {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        #capture-btn, #edit-capture-btn {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 1.2em;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        #capture-btn:hover, #edit-capture-btn:hover {
-            background-color: #1b5e20;
-        }
-
-        .photo-options {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .photo-option-btn {
-            flex: 1;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #c8e6c9;
-            background-color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            font-size: 0.9em;
-            transition: all 0.2s ease;
-        }
-
-        .photo-option-btn:hover {
-            background-color: #f1f8e9;
-            border-color: var(--accent-color);
-        }
-
-        .photo-option-btn:active {
-            transform: scale(0.98);
-        }
-
-        #photo-upload, #edit-photo-upload {
-            display: none;
-        }
-
-        #photo-canvas, #edit-photo-canvas {
-            display: none;
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .spinner-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        footer {
-            margin-top: 30px;
-            color: var(--dark-text-color);
-            font-size: 0.9em;
-            opacity: 0.8;
-            text-align: center;
-            padding: 0 15px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
+        @media (max-width: 540px) {
             body {
                 padding: 15px;
-                min-height: auto;
             }
-            
-            .card {
-                padding: 20px;
+            header h1 {
+                font-size: 1.5em;
             }
-            
+            header p {
+                font-size: 1em;
+            }
             .nav-tabs {
-                border-radius: 12px;
+                flex-direction: row;
+                overflow-x: auto;
                 padding: 8px;
                 justify-content: flex-start;
-                overflow-x: auto;
-                scrollbar-width: none;
+                border-radius: 12px;
             }
-            
-            .nav-tabs::-webkit-scrollbar {
-                display: none;
-            }
-            
-            .member-detail strong {
-                width: 80px;
+            .nav-tab {
+                white-space: nowrap;
+                padding: 8px 15px;
                 font-size: 0.9em;
-            }
-            
-            .photo-options {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .card {
-                padding: 15px;
-            }
-            
-            .input-field, .button {
-                padding: 10px 12px;
-            }
-            
-            header h1 {
-                flex-direction: column;
-                gap: 5px;
             }
         }
     </style>
@@ -588,25 +260,28 @@
     <div class="main-container">
         <header>
             <h1><i class="fas fa-leaf"></i> Aplikasi VIP Dolan Sawah</h1>
-            <p>Manajemen Member VIP DS</p>
+            <p>Manajemen Member VIP Restoran Organik</p>
         </header>
 
         <div class="nav-tabs">
             <div class="nav-tab active" data-tab="scan"><i class="fas fa-qrcode"></i> Scan QR</div>
             <div class="nav-tab" data-tab="member"><i class="fas fa-users"></i> Member</div>
-            <div class="nav-tab" data-tab="add"><i class="fas fa-user-plus"></i> Tambah</div>
-            <div class="nav-tab" data-tab="edit"><i class="fas fa-user-edit"></i> Edit</div>
         </div>
 
         <!-- Scan QR Code Tab -->
         <div id="scan-tab" class="tab-content">
             <div id="reader-container">
                 <div id="reader"></div>
+                <div id="manual-input-section">
+                    <p>Scanner tidak tersedia, masukkan kode manual:</p>
+                    <input type="text" id="manual-qr-input" class="input-field" placeholder="Masukkan kode QR">
+                    <button id="submit-manual" class="button">Submit</button>
+                </div>
             </div>
             
             <div class="card">
                 <label class="label"><i class="fas fa-qrcode"></i> Hasil Pindaian QR Code</label>
-                <div id="result-display" class="empty-state">Belum ada kode yang dipindai...</div>
+                <div id="result-display">Belum ada kode yang dipindai...</div>
                 <button id="copy-button" class="button button-tertiary" disabled><i class="fas fa-copy"></i> Salin Kode</button>
             </div>
         </div>
@@ -616,173 +291,12 @@
             <div class="card">
                 <label class="label"><i class="fas fa-id-card"></i> ID Member</label>
                 <div class="input-group">
-                    <input type="text" id="member-id-input" class="input-field" placeholder="Masukkan ID Member" autocomplete="off">
+                    <input type="text" id="member-id-input" class="input-field" placeholder="Masukkan ID Member">
                     <button id="paste-member-id" class="button button-secondary"><i class="fas fa-paste"></i> Paste ID</button>
                 </div>
                 
-                <div id="member-info-container" class="member-info hidden">
-                    <img id="member-photo" class="member-photo" src="" alt="Foto Member" onerror="this.src='https://via.placeholder.com/100?text=Member'">
-                    <div class="member-detail"><strong>Nama:</strong> <span id="member-name"></span></div>
-                    <div class="member-detail"><strong>Alamat:</strong> <span id="member-address"></span></div>
-                    <div class="member-detail"><strong>No. HP:</strong> <span id="member-phone"></span></div>
-                    <div class="member-detail"><strong>Poin:</strong> <span id="member-points"></span> <span class="benefit-badge">VIP</span></div>
-                    <div class="member-detail"><strong>Benefit:</strong> <div id="member-benefits" class="empty-state">Tidak ada benefit khusus</div></div>
-                    
-                    <div class="input-group">
-                        <label class="label"><i class="fas fa-money-bill-wave"></i> Nominal Transaksi</label>
-                        <input type="number" id="transaction-amount" class="input-field" placeholder="Masukkan nominal transaksi (Rp)" min="0" autocomplete="off">
-                        <div id="transaction-error" class="error-message hidden"></div>
-                        <button id="save-transaction" class="button"><i class="fas fa-coins"></i> Tambah Poin</button>
-                    </div>
-                </div>
-                
-                <div id="member-not-found" class="error-message hidden">
-                    <i class="fas fa-exclamation-circle"></i> Member tidak ditemukan. Silakan coba lagi atau tambahkan member baru.
-                </div>
-                
-                <div id="member-loading" class="spinner-container hidden">
-                    <div class="loading-spinner"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Add Member Tab -->
-        <div id="add-tab" class="tab-content hidden">
-            <div class="card">
-                <h3 style="color: var(--primary-color); margin-top: 0; text-align: center;"><i class="fas fa-gift"></i> Dapatkan 10 Poin Gratis!</h3>
-                <p style="text-align: center; color: var(--dark-text-color); margin-bottom: 20px;">Untuk member baru pertama kali</p>
-                
-                <div class="input-group">
-                    <label class="label"><i class="fas fa-id-card"></i> ID Member Baru</label>
-                    <input type="text" id="new-member-id" class="input-field" placeholder="Masukkan ID Member baru" autocomplete="off" autofocus>
-                    <button id="paste-new-member-id" class="button button-secondary"><i class="fas fa-paste"></i> Paste ID</button>
-                </div>
-                
-                <div class="input-group">
-                    <label class="label"><i class="fas fa-user"></i> Nama Lengkap</label>
-                    <input type="text" id="new-member-name" class="input-field" placeholder="Masukkan nama lengkap" required>
-                </div>
-                
-                <div class="input-group">
-                    <label class="label"><i class="fas fa-map-marker-alt"></i> Alamat</label>
-                    <input type="text" id="new-member-address" class="input-field" placeholder="Masukkan alamat">
-                </div>
-                
-                <div class="input-group">
-                    <label class="label"><i class="fas fa-phone"></i> Nomor HP</label>
-                    <input type="tel" id="new-member-phone" class="input-field" placeholder="Masukkan nomor HP" pattern="[0-9]{10,15}">
-                    <div class="warning-message"><i class="fas fa-info-circle"></i> Format: 08xxxxxxxxxx (10-15 digit)</div>
-                </div>
-                
-                <div class="input-group">
-                    <label class="label"><i class="fas fa-camera"></i> Foto Member</label>
-                    <div class="camera-container">
-                        <video id="camera-preview" autoplay playsinline></video>
-                        <button id="capture-btn" class="hidden"><i class="fas fa-camera"></i></button>
-                    </div>
-                    <div class="photo-options">
-                        <button id="start-camera" class="photo-option-btn"><i class="fas fa-camera"></i> Ambil Foto</button>
-                        <button id="upload-photo" class="photo-option-btn"><i class="fas fa-upload"></i> Upload</button>
-                        <input type="file" id="photo-upload" accept="image/*" class="hidden">
-                    </div>
-                    <canvas id="photo-canvas" class="hidden"></canvas>
-                </div>
-                
-                <div class="input-group">
-                    <label class="label"><i class="fas fa-star"></i> Benefit Member</label>
-                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="new-benefit-input" class="input-field" placeholder="Masukkan benefit" style="flex: 1;">
-                        <button id="add-benefit" class="button" style="width: auto; padding: 0 15px;"><i class="fas fa-plus"></i> Tambah</button>
-                    </div>
-                    <div id="benefits-container" class="empty-state">Belum ada benefit ditambahkan</div>
-                </div>
-                
-                <button id="save-member" class="button"><i class="fas fa-user-plus"></i> Daftarkan Member Baru</button>
-                <div id="add-member-error" class="error-message hidden"></div>
-                <div id="add-member-success" class="success-message hidden">
-                    <i class="fas fa-check-circle"></i> Member berhasil didaftarkan dengan 10 poin gratis!
-                </div>
-                
-                <div id="add-member-loading" class="spinner-container hidden">
-                    <div class="loading-spinner"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Edit Member Tab -->
-        <div id="edit-tab" class="tab-content hidden">
-            <div class="card">
-                <label class="label"><i class="fas fa-search"></i> Cari Member</label>
-                <div class="input-group">
-                    <input type="text" id="edit-member-id" class="input-field" placeholder="Masukkan ID Member" autocomplete="off" autofocus>
-                    <button id="search-member" class="button button-secondary"><i class="fas fa-search"></i> Cari</button>
-                </div>
-                
-                <div id="edit-member-loading" class="spinner-container hidden">
-                    <div class="loading-spinner"></div>
-                </div>
-                
-                <div id="edit-member-info" class="hidden">
-                    <div class="input-group">
-                        <label class="label"><i class="fas fa-id-card"></i> ID Member</label>
-                        <input type="text" id="edit-member-id-display" class="input-field" readonly>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="label"><i class="fas fa-user"></i> Nama Lengkap</label>
-                        <input type="text" id="edit-member-name" class="input-field" placeholder="Nama member" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="label"><i class="fas fa-map-marker-alt"></i> Alamat</label>
-                        <input type="text" id="edit-member-address" class="input-field" placeholder="Alamat member">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="label"><i class="fas fa-phone"></i> Nomor HP</label>
-                        <input type="tel" id="edit-member-phone" class="input-field" placeholder="Nomor HP member" pattern="[0-9]{10,15}">
-                        <div class="warning-message"><i class="fas fa-info-circle"></i> Format: 08xxxxxxxxxx (10-15 digit)</div>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="label"><i class="fas fa-camera"></i> Foto Member</label>
-                        <img id="edit-member-photo-preview" src="" class="member-photo" style="margin-bottom: 10px;" onerror="this.src='https://via.placeholder.com/100?text=Member'">
-                        <div class="camera-container">
-                            <video id="edit-camera-preview" autoplay playsinline class="hidden"></video>
-                            <button id="edit-capture-btn" class="hidden"><i class="fas fa-camera"></i></button>
-                        </div>
-                        <div class="photo-options">
-                            <button id="edit-start-camera" class="photo-option-btn"><i class="fas fa-camera"></i> Ambil Foto Baru</button>
-                            <button id="edit-upload-photo" class="photo-option-btn"><i class="fas fa-upload"></i> Upload</button>
-                            <input type="file" id="edit-photo-upload" accept="image/*" class="hidden">
-                        </div>
-                        <canvas id="edit-photo-canvas" class="hidden"></canvas>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="label"><i class="fas fa-coins"></i> Poin Member</label>
-                        <input type="number" id="edit-member-points" class="input-field" placeholder="Poin member" min="0">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="label"><i class="fas fa-star"></i> Benefit Member</label>
-                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <input type="text" id="edit-benefit-input" class="input-field" placeholder="Masukkan benefit" style="flex: 1;">
-                            <button id="edit-add-benefit" class="button" style="width: auto; padding: 0 15px;"><i class="fas fa-plus"></i> Tambah</button>
-                        </div>
-                        <div id="edit-benefits-container" class="empty-state">Belum ada benefit ditambahkan</div>
-                    </div>
-                    
-                    <button id="update-member" class="button"><i class="fas fa-save"></i> Simpan Perubahan</button>
-                    <button id="delete-member" class="button button-danger"><i class="fas fa-trash"></i> Hapus Member</button>
-                    <div id="edit-member-error" class="error-message hidden"></div>
-                    <div id="edit-member-success" class="success-message hidden">
-                        <i class="fas fa-check-circle"></i> Data member berhasil diperbarui!
-                    </div>
-                </div>
-                
-                <div id="edit-member-not-found" class="error-message hidden">
-                    <i class="fas fa-exclamation-circle"></i> Member tidak ditemukan. Silakan coba ID yang lain.
+                <div id="member-info-container" class="hidden">
+                    <!-- Member info will be displayed here -->
                 </div>
             </div>
         </div>
@@ -794,137 +308,32 @@
     </div>
 
     <footer>
-        &copy; 2025 Dolan Sawah Restaurant Group | <i class="fas fa-leaf"></i> by Ryan
+        &copy; 2025 Dolan Sawah Restaurant Group | <i class="fas fa-leaf"></i> Makanan Organik Berkualitas
     </footer>
 
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize variables
-            let stream = null;
-            let editStream = null;
-            let lastResult = '';
-            let benefits = [];
-            let editBenefits = [];
-            let html5QrcodeScanner = null;
-            
             // Tab navigation
             const tabs = document.querySelectorAll('.nav-tab');
             const tabContents = document.querySelectorAll('.tab-content');
             
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    // Switch tabs
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.add('hidden'));
                     
                     tab.classList.add('active');
                     const tabId = tab.getAttribute('data-tab') + '-tab';
                     document.getElementById(tabId).classList.remove('hidden');
-                    
-                    // Set focus to first input in the tab
-                    const firstInput = document.querySelector(`#${tabId} .input-field`);
-                    if (firstInput) firstInput.focus();
-                    
-                    // Stop cameras when leaving camera tabs
-                    if (tabId !== 'add-tab' && tabId !== 'edit-tab') {
-                        stopCamera();
-                        stopEditCamera();
-                    }
-                    
-                    // Initialize QR scanner only when scan tab is active
-                    if (tabId === 'scan-tab' && !html5QrcodeScanner) {
-                        initQRScanner();
-                    }
                 });
             });
 
-            // Initialize QR Scanner
-            function initQRScanner() {
-                if (html5QrcodeScanner) return;
-                
-                html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader",
-                    { 
-                        fps: 10, 
-                        qrbox: (viewfinderWidth, viewfinderHeight) => {
-                            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                            const qrboxSize = Math.floor(minEdge * 0.7);
-                            return { width: qrboxSize, height: qrboxSize };
-                        },
-                        rememberLastUsedCamera: true,
-                        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-                    },
-                    false
-                );
-                
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            }
-
-            // QR Code Scanner callbacks - MODIFIED TO AUTO-SWITCH TABS AND COPY ID
-            function onScanSuccess(decodedText, decodedResult) {
-                if (decodedText !== lastResult) {
-                    lastResult = decodedText;
-                    
-                    const resultDisplay = document.getElementById('result-display');
-                    resultDisplay.classList.remove('empty-state');
-                    
-                    try {
-                        new URL(decodedText);
-                        resultDisplay.innerHTML = `<a href="${decodedText}" target="_blank" rel="noopener noreferrer">${decodedText}</a>`;
-                    } catch (_) {
-                        resultDisplay.textContent = decodedText;
-                    }
-                    
-                    document.getElementById('copy-button').disabled = false;
-                    console.log(`Scan Selesai: ${decodedText}`);
-                    
-                    // Auto-copy the scanned code to clipboard
-                    copyToClipboard(decodedText);
-                    
-                    // Auto-switch to member tab and paste the ID
-                    setTimeout(() => {
-                        document.querySelector('.nav-tab[data-tab="member"]').click();
-                        document.getElementById('member-id-input').value = decodedText;
-                        loadMemberData(decodedText);
-                    }, 500);
-                }
-            }
-
-            function onScanFailure(error) {
-                console.log('QR Scan error:', error);
-            }
-
-            // Helper function to copy text to clipboard
-            function copyToClipboard(text) {
-                navigator.clipboard.writeText(text)
-                    .then(() => {
-                        console.log('Kode berhasil disalin ke clipboard:', text);
-                        showNotification('Kode berhasil disalin ke clipboard!');
-                    })
-                    .catch(err => {
-                        console.error('Gagal menyalin teks: ', err);
-                        showNotification('Gagal menyalin kode. Pastikan HTTPS!', 'error');
-                    });
-            }
-
             // Notification system
-            function showNotification(message, type = 'success') {
+            function showNotification(message) {
                 const notification = document.getElementById('notification');
                 const notificationText = document.getElementById('notification-text');
-                const icon = notification.querySelector('i');
-                
-                // Set notification type
-                notification.className = 'notification';
-                if (type === 'error') {
-                    notification.classList.add('error');
-                    icon.className = 'fas fa-exclamation-circle';
-                } else if (type === 'warning') {
-                    notification.classList.add('warning');
-                    icon.className = 'fas fa-exclamation-triangle';
-                } else {
-                    icon.className = 'fas fa-check-circle';
-                }
                 
                 notificationText.textContent = message;
                 notification.classList.add('show');
@@ -934,703 +343,142 @@
                 }, 3000);
             }
 
-            // Copy button functionality
-            document.getElementById('copy-button').addEventListener('click', () => {
-                if (!lastResult) return;
-                copyToClipboard(lastResult);
-            });
+            // Deteksi perangkat
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-            // Member Area functionality
-            const memberIdInput = document.getElementById('member-id-input');
-            const pasteMemberIdBtn = document.getElementById('paste-member-id');
-            const memberInfoContainer = document.getElementById('member-info-container');
-            const memberNotFound = document.getElementById('member-not-found');
-            const memberLoading = document.getElementById('member-loading');
-            const memberPhoto = document.getElementById('member-photo');
-            const memberName = document.getElementById('member-name');
-            const memberAddress = document.getElementById('member-address');
-            const memberPhone = document.getElementById('member-phone');
-            const memberPoints = document.getElementById('member-points');
-            const memberBenefits = document.getElementById('member-benefits');
-            const transactionAmount = document.getElementById('transaction-amount');
-            const saveTransactionBtn = document.getElementById('save-transaction');
-            const transactionError = document.getElementById('transaction-error');
+            // QR Code Scanner functionality
+            const resultDisplay = document.getElementById('result-display');
+            const copyButton = document.getElementById('copy-button');
+            let lastResult = '';
 
-            // Paste Member ID button
-            pasteMemberIdBtn.addEventListener('click', async () => {
+            async function initializeScanner() {
                 try {
-                    const text = await navigator.clipboard.readText();
-                    memberIdInput.value = text;
-                    loadMemberData(text);
-                } catch (err) {
-                    console.error('Failed to read clipboard contents: ', err);
-                    showNotification('Gagal membaca clipboard. Pastikan HTTPS!', 'error');
-                }
-            });
-
-            // Load member data when ID is entered
-            memberIdInput.addEventListener('change', () => {
-                if (memberIdInput.value.trim()) {
-                    loadMemberData(memberIdInput.value.trim());
-                }
-            });
-
-            // Load member data from localStorage with loading state
-            function loadMemberData(memberId) {
-                memberInfoContainer.classList.add('hidden');
-                memberNotFound.classList.add('hidden');
-                memberLoading.classList.remove('hidden');
-                
-                // Simulate loading delay (remove in production)
-                setTimeout(() => {
-                    const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
-                    const member = members[memberId];
-                    
-                    memberLoading.classList.add('hidden');
-                    
-                    if (member) {
-                        // Display member info
-                        memberPhoto.src = member.photo || 'https://via.placeholder.com/100?text=Member';
-                        memberName.textContent = member.name || '-';
-                        memberAddress.textContent = member.address || '-';
-                        memberPhone.textContent = member.phone || '-';
-                        memberPoints.textContent = member.points || '0';
-                        
-                        // Display benefits
-                        memberBenefits.innerHTML = '';
-                        if (member.benefits && member.benefits.length > 0) {
-                            member.benefits.forEach(benefit => {
-                                const span = document.createElement('span');
-                                span.className = 'benefit-item';
-                                span.textContent = benefit;
-                                memberBenefits.appendChild(span);
-                            });
-                            memberBenefits.classList.remove('empty-state');
-                        } else {
-                            memberBenefits.textContent = 'Tidak ada benefit khusus';
-                            memberBenefits.classList.add('empty-state');
-                        }
-                        
-                        memberInfoContainer.classList.remove('hidden');
-                        memberNotFound.classList.add('hidden');
-                        
-                        // Focus transaction amount input
-                        transactionAmount.focus();
-                    } else {
-                        memberInfoContainer.classList.add('hidden');
-                        memberNotFound.classList.remove('hidden');
+                    // Cek dukungan kamera
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        throw new Error("Browser tidak mendukung akses kamera");
                     }
-                }, 500);
-            }
 
-            // Save transaction
-            saveTransactionBtn.addEventListener('click', () => {
-                const amount = parseInt(transactionAmount.value);
-                const memberId = memberIdInput.value.trim();
-                
-                if (!amount || amount <= 0) {
-                    transactionError.textContent = 'Masukkan nominal transaksi yang valid';
-                    transactionError.classList.remove('hidden');
-                    return;
-                }
-                
-                if (!memberId) {
-                    transactionError.textContent = 'ID Member tidak valid';
-                    transactionError.classList.remove('hidden');
-                    return;
-                }
-                
-                transactionError.classList.add('hidden');
-                
-                // Calculate points (100,000 = 1 point)
-                const pointsToAdd = Math.floor(amount / 100000);
-                
-                // Update member data
-                const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
-                if (members[memberId]) {
-                    members[memberId].points = (parseInt(members[memberId].points) || 0) + pointsToAdd;
-                    localStorage.setItem('vipMembers', JSON.stringify(members));
-                    
-                    // Update displayed points
-                    memberPoints.textContent = members[memberId].points;
-                    transactionAmount.value = '';
-                    
-                    showNotification(`Transaksi Rp${amount.toLocaleString()} berhasil! +${pointsToAdd} poin`);
-                } else {
-                    transactionError.textContent = 'Member tidak ditemukan';
-                    transactionError.classList.remove('hidden');
-                }
-            });
-
-            // Camera functionality for adding new member
-            const cameraPreview = document.getElementById('camera-preview');
-            const captureBtn = document.getElementById('capture-btn');
-            const startCameraBtn = document.getElementById('start-camera');
-            const uploadPhotoBtn = document.getElementById('upload-photo');
-            const photoUpload = document.getElementById('photo-upload');
-            const photoCanvas = document.getElementById('photo-canvas');
-
-            // Start camera
-            startCameraBtn.addEventListener('click', async () => {
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            facingMode: 'user',
+                    // Permintaan izin kamera terlebih dahulu
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: "environment",
                             width: { ideal: 1280 },
                             height: { ideal: 720 }
-                        } 
+                        }
                     });
-                    cameraPreview.srcObject = stream;
-                    captureBtn.classList.remove('hidden');
-                    startCameraBtn.disabled = true;
-                    uploadPhotoBtn.disabled = true;
-                } catch (err) {
-                    console.error('Error accessing camera:', err);
-                    showNotification('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
-                }
-            });
 
-            // Capture photo
-            captureBtn.addEventListener('click', () => {
-                photoCanvas.width = cameraPreview.videoWidth;
-                photoCanvas.height = cameraPreview.videoHeight;
-                const ctx = photoCanvas.getContext('2d');
-                ctx.drawImage(cameraPreview, 0, 0, photoCanvas.width, photoCanvas.height);
-                
-                // Stop camera
-                stopCamera();
-            });
-
-            // Upload photo
-            uploadPhotoBtn.addEventListener('click', () => {
-                photoUpload.click();
-            });
-
-            photoUpload.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-                        showNotification('Ukuran file terlalu besar (maks 2MB)', 'error');
-                        return;
-                    }
-                    
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            // Resize image to max 800px width while maintaining aspect ratio
-                            const maxWidth = 800;
-                            const scale = maxWidth / img.width;
-                            const newWidth = img.width * scale;
-                            const newHeight = img.height * scale;
-                            
-                            photoCanvas.width = newWidth;
-                            photoCanvas.height = newHeight;
-                            const ctx = photoCanvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, newWidth, newHeight);
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            // Stop camera function
-            function stopCamera() {
-                if (stream) {
+                    // Hentikan stream karena library akan membuat stream sendiri
                     stream.getTracks().forEach(track => track.stop());
-                    stream = null;
+
+                    // Inisialisasi scanner
+                    const html5QrcodeScanner = new Html5QrcodeScanner(
+                        "reader",
+                        { 
+                            fps: 10,
+                            qrbox: { width: 250, height: 250 },
+                            aspectRatio: 1.0,
+                            disableFlip: false,
+                            videoConstraints: {
+                                facingMode: "environment",
+                                width: { min: 640, ideal: 1280, max: 1920 },
+                                height: { min: 480, ideal: 720, max: 1080 }
+                            },
+                            rememberLastUsedCamera: true,
+                            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                        },
+                        true // verbose mode
+                    );
+
+                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                    
+                } catch (error) {
+                    console.error("Scanner Error:", error);
+                    showNotification(`Error: ${error.message}`);
+                    document.getElementById('manual-input-section').style.display = 'block';
                 }
-                cameraPreview.srcObject = null;
-                captureBtn.classList.add('hidden');
-                startCameraBtn.disabled = false;
-                uploadPhotoBtn.disabled = false;
             }
 
-            // Add New Member functionality
-            const newMemberId = document.getElementById('new-member-id');
-            const pasteNewMemberId = document.getElementById('paste-new-member-id');
-            const newMemberName = document.getElementById('new-member-name');
-            const newMemberAddress = document.getElementById('new-member-address');
-            const newMemberPhone = document.getElementById('new-member-phone');
-            const saveMemberBtn = document.getElementById('save-member');
-            const addMemberError = document.getElementById('add-member-error');
-            const addMemberSuccess = document.getElementById('add-member-success');
-            const addMemberLoading = document.getElementById('add-member-loading');
-            const newBenefitInput = document.getElementById('new-benefit-input');
-            const addBenefitBtn = document.getElementById('add-benefit');
-            const benefitsContainer = document.getElementById('benefits-container');
+            function onScanSuccess(decodedText, decodedResult) {
+                if (decodedText !== lastResult) {
+                    lastResult = decodedText;
+                    
+                    resultDisplay.textContent = decodedText;
+                    copyButton.disabled = false;
+                    
+                    // Auto copy to clipboard
+                    navigator.clipboard.writeText(decodedText)
+                        .then(() => showNotification("Kode berhasil disalin!"))
+                        .catch(err => console.error("Copy failed:", err));
+                }
+            }
 
-            // Paste New Member ID button - MODIFIED TO AUTO-SWITCH FROM SCAN TAB
-            pasteNewMemberId.addEventListener('click', async () => {
+            function onScanFailure(error) {
+                let errorMsg = "Error memindai QR Code";
+                if (error && error.message) {
+                    errorMsg = error.message;
+                    
+                    if (error.name === 'NotAllowedError') {
+                        errorMsg = "Izin kamera ditolak. Harap berikan izin kamera.";
+                    } else if (error.name === 'NotFoundError') {
+                        errorMsg = "Kamera tidak ditemukan";
+                    }
+                }
+                
+                console.error('Scan Error:', error);
+                showNotification(errorMsg);
+                document.getElementById('manual-input-section').style.display = 'block';
+            }
+
+            // Workaround khusus Android untuk masalah izin
+            if (isAndroid) {
+                document.addEventListener('click', function androidCameraWorkaround() {
+                    initializeScanner();
+                    document.removeEventListener('click', androidCameraWorkaround);
+                }, { once: true });
+            } else {
+                // Untuk iOS dan desktop, langsung inisialisasi
+                initializeScanner();
+            }
+
+            // Fallback input manual
+            document.getElementById('submit-manual').addEventListener('click', () => {
+                const manualCode = document.getElementById('manual-qr-input').value.trim();
+                if (manualCode) {
+                    lastResult = manualCode;
+                    resultDisplay.textContent = manualCode;
+                    copyButton.disabled = false;
+                    showNotification("Kode manual diterima!");
+                }
+            });
+
+            // Copy button functionality
+            copyButton.addEventListener('click', () => {
+                if (!lastResult) return;
+                navigator.clipboard.writeText(lastResult)
+                    .then(() => showNotification("Kode berhasil disalin!"))
+                    .catch(err => showNotification("Gagal menyalin kode"));
+            });
+
+            // Paste button functionality
+            document.getElementById('paste-member-id').addEventListener('click', async () => {
                 try {
                     const text = await navigator.clipboard.readText();
-                    newMemberId.value = text;
-                    // Auto-focus to next field for better UX
-                    newMemberName.focus();
+                    document.getElementById('member-id-input').value = text;
+                    showNotification("ID berhasil dipaste");
                 } catch (err) {
-                    console.error('Failed to read clipboard contents: ', err);
-                    showNotification('Gagal membaca clipboard. Pastikan HTTPS!', 'error');
+                    showNotification("Gagal membaca clipboard");
                 }
             });
 
-            // Add benefit
-            addBenefitBtn.addEventListener('click', () => {
-                const benefit = newBenefitInput.value.trim();
-                if (benefit) {
-                    benefits.push(benefit);
-                    renderBenefits();
-                    newBenefitInput.value = '';
-                    newBenefitInput.focus();
-                }
-            });
-
-            // Also add benefit when pressing Enter
-            newBenefitInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    addBenefitBtn.click();
-                }
-            });
-
-            function renderBenefits() {
-                benefitsContainer.innerHTML = '';
-                
-                if (benefits.length === 0) {
-                    benefitsContainer.classList.add('empty-state');
-                    benefitsContainer.textContent = 'Belum ada benefit ditambahkan';
-                    return;
-                }
-                
-                benefitsContainer.classList.remove('empty-state');
-                benefits.forEach((benefit, index) => {
-                    const span = document.createElement('span');
-                    span.className = 'benefit-item';
-                    span.textContent = benefit;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.innerHTML = '&times;';
-                    removeBtn.title = 'Hapus benefit';
-                    removeBtn.addEventListener('click', () => {
-                        benefits.splice(index, 1);
-                        renderBenefits();
-                    });
-                    
-                    span.appendChild(removeBtn);
-                    benefitsContainer.appendChild(span);
-                });
-            }
-
-            // Save new member with 10 points bonus and photo
-            saveMemberBtn.addEventListener('click', () => {
-                const memberId = newMemberId.value.trim();
-                const name = newMemberName.value.trim();
-                const address = newMemberAddress.value.trim();
-                const phone = newMemberPhone.value.trim();
-                
-                // Validation
-                if (!memberId) {
-                    addMemberError.textContent = 'ID Member harus diisi';
-                    addMemberError.classList.remove('hidden');
-                    newMemberId.focus();
-                    return;
-                }
-                
-                if (!name) {
-                    addMemberError.textContent = 'Nama member harus diisi';
-                    addMemberError.classList.remove('hidden');
-                    newMemberName.focus();
-                    return;
-                }
-                
-                // Validate phone number if provided
-                if (phone && !/^[0-9]{10,15}$/.test(phone)) {
-                    addMemberError.textContent = 'Nomor HP harus 10-15 digit angka';
-                    addMemberError.classList.remove('hidden');
-                    newMemberPhone.focus();
-                    return;
-                }
-                
-                addMemberError.classList.add('hidden');
-                
-                // Show loading state
-                saveMemberBtn.disabled = true;
-                addMemberLoading.classList.remove('hidden');
-                
-                // Get photo data
-                let photoData = '';
-                if (photoCanvas.width > 0) {
-                    // Compress image to 80% quality
-                    photoData = photoCanvas.toDataURL('image/jpeg', 0.8);
-                }
-                
-                // Simulate processing delay
-                setTimeout(() => {
-                    // Save to localStorage with 10 points bonus
-                    const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
-                    
-                    if (members[memberId]) {
-                        addMemberError.textContent = 'ID Member sudah terdaftar';
-                        addMemberError.classList.remove('hidden');
-                        saveMemberBtn.disabled = false;
-                        addMemberLoading.classList.add('hidden');
-                        return;
+            // Reload halaman ketika kembali ke tab (untuk Android)
+            window.addEventListener('focus', () => {
+                if (isAndroid && document.querySelector('.nav-tab.active').dataset.tab === 'scan') {
+                    if (!document.querySelector('#reader video')) {
+                        window.location.reload();
                     }
-                    
-                    members[memberId] = {
-                        name,
-                        address,
-                        phone,
-                        photo: photoData || 'https://via.placeholder.com/100?text=Member',
-                        points: 10, // 10 points bonus for new members
-                        benefits: [...benefits], // Copy benefits array
-                        joinDate: new Date().toISOString()
-                    };
-                    
-                    localStorage.setItem('vipMembers', JSON.stringify(members));
-                    
-                    // Show success message
-                    addMemberSuccess.classList.remove('hidden');
-                    setTimeout(() => {
-                        addMemberSuccess.classList.add('hidden');
-                    }, 5000);
-                    
-                    // Reset form
-                    newMemberId.value = '';
-                    newMemberName.value = '';
-                    newMemberAddress.value = '';
-                    newMemberPhone.value = '';
-                    benefits = [];
-                    renderBenefits();
-                    photoCanvas.width = 0;
-                    photoCanvas.height = 0;
-                    stopCamera();
-                    saveMemberBtn.disabled = false;
-                    addMemberLoading.classList.add('hidden');
-                    
-                    showNotification(`Member baru berhasil didaftarkan! 10 poin gratis diberikan.`);
-                    
-                    // Switch to member tab
-                    document.querySelector('.nav-tab[data-tab="member"]').click();
-                    memberIdInput.value = memberId;
-                    loadMemberData(memberId);
-                }, 1000);
-            });
-
-            // Edit Member functionality
-            const editMemberId = document.getElementById('edit-member-id');
-            const searchMemberBtn = document.getElementById('search-member');
-            const editMemberInfo = document.getElementById('edit-member-info');
-            const editMemberNotFound = document.getElementById('edit-member-not-found');
-            const editMemberLoading = document.getElementById('edit-member-loading');
-            const editMemberIdDisplay = document.getElementById('edit-member-id-display');
-            const editMemberName = document.getElementById('edit-member-name');
-            const editMemberAddress = document.getElementById('edit-member-address');
-            const editMemberPhone = document.getElementById('edit-member-phone');
-            const editMemberPhotoPreview = document.getElementById('edit-member-photo-preview');
-            const editMemberPoints = document.getElementById('edit-member-points');
-            const updateMemberBtn = document.getElementById('update-member');
-            const deleteMemberBtn = document.getElementById('delete-member');
-            const editMemberError = document.getElementById('edit-member-error');
-            const editMemberSuccess = document.getElementById('edit-member-success');
-            const editCameraPreview = document.getElementById('edit-camera-preview');
-            const editCaptureBtn = document.getElementById('edit-capture-btn');
-            const editStartCameraBtn = document.getElementById('edit-start-camera');
-            const editUploadPhotoBtn = document.getElementById('edit-upload-photo');
-            const editPhotoUpload = document.getElementById('edit-photo-upload');
-            const editPhotoCanvas = document.getElementById('edit-photo-canvas');
-            const editBenefitInput = document.getElementById('edit-benefit-input');
-            const editAddBenefitBtn = document.getElementById('edit-add-benefit');
-            const editBenefitsContainer = document.getElementById('edit-benefits-container');
-
-            // Search member - MODIFIED TO AUTO-SWITCH FROM SCAN TAB
-            searchMemberBtn.addEventListener('click', () => {
-                const memberId = editMemberId.value.trim();
-                
-                if (!memberId) {
-                    editMemberError.textContent = 'Masukkan ID Member yang valid';
-                    editMemberError.classList.remove('hidden');
-                    return;
-                }
-                
-                editMemberInfo.classList.add('hidden');
-                editMemberNotFound.classList.add('hidden');
-                editMemberLoading.classList.remove('hidden');
-                
-                // Simulate loading delay
-                setTimeout(() => {
-                    const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
-                    const member = members[memberId];
-                    
-                    editMemberLoading.classList.add('hidden');
-                    
-                    if (member) {
-                        // Display member info in edit form
-                        editMemberIdDisplay.value = memberId;
-                        editMemberName.value = member.name || '';
-                        editMemberAddress.value = member.address || '';
-                        editMemberPhone.value = member.phone || '';
-                        editMemberPhotoPreview.src = member.photo || 'https://via.placeholder.com/100?text=Member';
-                        editMemberPoints.value = member.points || '0';
-                        
-                        // Display benefits
-                        editBenefits = member.benefits || [];
-                        renderEditBenefits();
-                        
-                        editMemberInfo.classList.remove('hidden');
-                        editMemberNotFound.classList.add('hidden');
-                        editMemberError.classList.add('hidden');
-                    } else {
-                        editMemberInfo.classList.add('hidden');
-                        editMemberNotFound.classList.remove('hidden');
-                    }
-                }, 500);
-            });
-
-            // Also search when pressing Enter
-            editMemberId.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    searchMemberBtn.click();
                 }
             });
-
-            // Edit camera functions
-            editStartCameraBtn.addEventListener('click', async () => {
-                try {
-                    editStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            facingMode: 'user',
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
-                        } 
-                    });
-                    editCameraPreview.srcObject = editStream;
-                    editCaptureBtn.classList.remove('hidden');
-                    editStartCameraBtn.disabled = true;
-                    editUploadPhotoBtn.disabled = true;
-                    editCameraPreview.classList.remove('hidden');
-                    editMemberPhotoPreview.classList.add('hidden');
-                } catch (err) {
-                    console.error('Error accessing camera:', err);
-                    showNotification('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
-                }
-            });
-
-            editCaptureBtn.addEventListener('click', () => {
-                editPhotoCanvas.width = editCameraPreview.videoWidth;
-                editPhotoCanvas.height = editCameraPreview.videoHeight;
-                const ctx = editPhotoCanvas.getContext('2d');
-                ctx.drawImage(editCameraPreview, 0, 0, editPhotoCanvas.width, editPhotoCanvas.height);
-                
-                // Update preview
-                editMemberPhotoPreview.src = editPhotoCanvas.toDataURL('image/jpeg', 0.8);
-                editMemberPhotoPreview.classList.remove('hidden');
-                
-                // Stop camera
-                stopEditCamera();
-            });
-
-            editUploadPhotoBtn.addEventListener('click', () => {
-                editPhotoUpload.click();
-            });
-
-            editPhotoUpload.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-                        showNotification('Ukuran file terlalu besar (maks 2MB)', 'error');
-                        return;
-                    }
-                    
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            // Resize image to max 800px width while maintaining aspect ratio
-                            const maxWidth = 800;
-                            const scale = maxWidth / img.width;
-                            const newWidth = img.width * scale;
-                            const newHeight = img.height * scale;
-                            
-                            editPhotoCanvas.width = newWidth;
-                            editPhotoCanvas.height = newHeight;
-                            const ctx = editPhotoCanvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, newWidth, newHeight);
-                            
-                            // Update preview
-                            editMemberPhotoPreview.src = editPhotoCanvas.toDataURL('image/jpeg', 0.8);
-                            editMemberPhotoPreview.classList.remove('hidden');
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            function stopEditCamera() {
-                if (editStream) {
-                    editStream.getTracks().forEach(track => track.stop());
-                    editStream = null;
-                }
-                editCameraPreview.srcObject = null;
-                editCaptureBtn.classList.add('hidden');
-                editStartCameraBtn.disabled = false;
-                editUploadPhotoBtn.disabled = false;
-                editCameraPreview.classList.add('hidden');
-            }
-
-            // Edit benefit functions
-            editAddBenefitBtn.addEventListener('click', () => {
-                const benefit = editBenefitInput.value.trim();
-                if (benefit) {
-                    editBenefits.push(benefit);
-                    renderEditBenefits();
-                    editBenefitInput.value = '';
-                    editBenefitInput.focus();
-                }
-            });
-
-            // Also add benefit when pressing Enter
-            editBenefitInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    editAddBenefitBtn.click();
-                }
-            });
-
-            function renderEditBenefits() {
-                editBenefitsContainer.innerHTML = '';
-                
-                if (editBenefits.length === 0) {
-                    editBenefitsContainer.classList.add('empty-state');
-                    editBenefitsContainer.textContent = 'Belum ada benefit ditambahkan';
-                    return;
-                }
-                
-                editBenefitsContainer.classList.remove('empty-state');
-                editBenefits.forEach((benefit, index) => {
-                    const span = document.createElement('span');
-                    span.className = 'benefit-item';
-                    span.textContent = benefit;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.innerHTML = '&times;';
-                    removeBtn.title = 'Hapus benefit';
-                    removeBtn.addEventListener('click', () => {
-                        editBenefits.splice(index, 1);
-                        renderEditBenefits();
-                    });
-                    
-                    span.appendChild(removeBtn);
-                    editBenefitsContainer.appendChild(span);
-                });
-            }
-
-            // Update member
-            updateMemberBtn.addEventListener('click', () => {
-                const memberId = editMemberIdDisplay.value;
-                const name = editMemberName.value.trim();
-                const address = editMemberAddress.value.trim();
-                const phone = editMemberPhone.value.trim();
-                const points = parseInt(editMemberPoints.value) || 0;
-                
-                if (!name) {
-                    editMemberError.textContent = 'Nama member harus diisi';
-                    editMemberError.classList.remove('hidden');
-                    editMemberName.focus();
-                    return;
-                }
-                
-                // Validate phone number if provided
-                if (phone && !/^[0-9]{10,15}$/.test(phone)) {
-                    editMemberError.textContent = 'Nomor HP harus 10-15 digit angka';
-                    editMemberError.classList.remove('hidden');
-                    editMemberPhone.focus();
-                    return;
-                }
-                
-                editMemberError.classList.add('hidden');
-                updateMemberBtn.disabled = true;
-                
-                // Simulate processing delay
-                setTimeout(() => {
-                    const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
-                    
-                    if (members[memberId]) {
-                        // Get photo data (use existing if no new photo taken)
-                        let photoData = members[memberId].photo;
-                        if (editPhotoCanvas.width > 0) {
-                            photoData = editPhotoCanvas.toDataURL('image/jpeg', 0.8);
-                        }
-                        
-                        members[memberId] = {
-                            ...members[memberId],
-                            name,
-                            address,
-                            phone,
-                            photo: photoData,
-                            points,
-                            benefits: [...editBenefits]
-                        };
-                        
-                        localStorage.setItem('vipMembers', JSON.stringify(members));
-                        
-                        editMemberSuccess.classList.remove('hidden');
-                        setTimeout(() => {
-                            editMemberSuccess.classList.add('hidden');
-                        }, 3000);
-                        
-                        updateMemberBtn.disabled = false;
-                        showNotification('Data member berhasil diperbarui!');
-                    } else {
-                        editMemberError.textContent = 'Member tidak ditemukan';
-                        editMemberError.classList.remove('hidden');
-                        updateMemberBtn.disabled = false;
-                    }
-                }, 500);
-            });
-
-            // Delete member
-            deleteMemberBtn.addEventListener('click', () => {
-                const memberId = editMemberIdDisplay.value;
-                
-                if (!memberId) {
-                    editMemberError.textContent = 'Tidak ada member yang dipilih';
-                    editMemberError.classList.remove('hidden');
-                    return;
-                }
-                
-                if (confirm(`Apakah Anda yakin ingin menghapus member ${memberId}?\nTindakan ini tidak dapat dibatalkan.`)) {
-                    deleteMemberBtn.disabled = true;
-                    
-                    // Simulate processing delay
-                    setTimeout(() => {
-                        const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
-                        delete members[memberId];
-                        localStorage.setItem('vipMembers', JSON.stringify(members));
-                        
-                        // Clear form
-                        editMemberId.value = '';
-                        editMemberInfo.classList.add('hidden');
-                        editMemberIdDisplay.value = '';
-                        editMemberName.value = '';
-                        editMemberAddress.value = '';
-                        editMemberPhone.value = '';
-                        editMemberPoints.value = '0';
-                        editBenefits = [];
-                        renderEditBenefits();
-                        editPhotoCanvas.width = 0;
-                        editPhotoCanvas.height = 0;
-                        stopEditCamera();
-                        deleteMemberBtn.disabled = false;
-                        
-                        showNotification(`Member ${memberId} berhasil dihapus!`);
-                    }, 500);
-                }
-            });
-
-            // Initialize QR scanner on page load if on scan tab
-            if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'scan') {
-                initQRScanner();
-            }
         });
     </script>
 </body>
