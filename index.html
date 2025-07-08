@@ -6,6 +6,7 @@
     <title>Aplikasi VIP member Dolan Sawah</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
         :root {
@@ -176,6 +177,19 @@
             box-shadow: none;
         }
 
+        .button-secondary {
+            background-color: var(--primary-color);
+        }
+
+        .button-secondary:hover {
+            background-color: #1b5e20;
+        }
+
+        .button-tertiary {
+            background-color: var(--accent-color);
+            color: var(--dark-text-color);
+        }
+
         .notification {
             position: fixed;
             top: 20px;
@@ -230,6 +244,59 @@
             box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
         }
 
+        .member-info {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .member-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid var(--primary-color);
+        }
+
+        .member-detail {
+            margin-bottom: 8px;
+        }
+
+        .member-detail strong {
+            display: inline-block;
+            width: 100px;
+            color: var(--primary-color);
+        }
+
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .password-box {
+            background-color: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 400px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .password-title {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         @media (max-width: 540px) {
             body {
                 padding: 15px;
@@ -260,12 +327,14 @@
     <div class="main-container">
         <header>
             <h1><i class="fas fa-leaf"></i> Aplikasi VIP Dolan Sawah</h1>
-            <p>Manajemen Member VIP Resto</p>
+            <p>Manajemen Member VIP Restoran Organik</p>
         </header>
 
         <div class="nav-tabs">
             <div class="nav-tab active" data-tab="scan"><i class="fas fa-qrcode"></i> Scan QR</div>
             <div class="nav-tab" data-tab="member"><i class="fas fa-users"></i> Member</div>
+            <div class="nav-tab" data-tab="add"><i class="fas fa-user-plus"></i> Tambah</div>
+            <div class="nav-tab" data-tab="edit"><i class="fas fa-user-edit"></i> Edit</div>
         </div>
 
         <!-- Scan QR Code Tab -->
@@ -295,39 +364,204 @@
                     <button id="paste-member-id" class="button button-secondary"><i class="fas fa-paste"></i> Paste ID</button>
                 </div>
                 
-                <div id="member-info-container" class="hidden">
-                    <!-- Member info will be displayed here -->
+                <div id="member-info-container" class="member-info hidden">
+                    <img id="member-photo" class="member-photo" src="" alt="Foto Member">
+                    <div class="member-detail"><strong>Nama:</strong> <span id="member-name"></span></div>
+                    <div class="member-detail"><strong>Alamat:</strong> <span id="member-address"></span></div>
+                    <div class="member-detail"><strong>No. HP:</strong> <span id="member-phone"></span></div>
+                    <div class="member-detail"><strong>Poin:</strong> <span id="member-points"></span></div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-money-bill-wave"></i> Nominal Transaksi</label>
+                        <input type="number" id="transaction-amount" class="input-field" placeholder="Masukkan nominal transaksi (Rp)">
+                        <button id="save-transaction" class="button"><i class="fas fa-coins"></i> Tambah Poin</button>
+                    </div>
+                </div>
+                
+                <div id="member-not-found" class="error-message hidden">
+                    Member tidak ditemukan. Silakan coba lagi atau tambahkan member baru.
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Member Tab -->
+        <div id="add-tab" class="tab-content hidden">
+            <div class="card">
+                <div class="input-group">
+                    <label class="label"><i class="fas fa-id-card"></i> ID Member Baru</label>
+                    <input type="text" id="new-member-id" class="input-field" placeholder="Masukkan ID Member baru">
+                </div>
+                
+                <div class="input-group">
+                    <label class="label"><i class="fas fa-user"></i> Nama Lengkap</label>
+                    <input type="text" id="new-member-name" class="input-field" placeholder="Masukkan nama lengkap">
+                </div>
+                
+                <div class="input-group">
+                    <label class="label"><i class="fas fa-map-marker-alt"></i> Alamat</label>
+                    <input type="text" id="new-member-address" class="input-field" placeholder="Masukkan alamat">
+                </div>
+                
+                <div class="input-group">
+                    <label class="label"><i class="fas fa-phone"></i> Nomor HP</label>
+                    <input type="tel" id="new-member-phone" class="input-field" placeholder="Masukkan nomor HP">
+                </div>
+                
+                <button id="save-member" class="button"><i class="fas fa-save"></i> Simpan Member Baru</button>
+                <div id="add-member-error" class="error-message hidden"></div>
+                <div id="add-member-success" class="success-message hidden">
+                    Member berhasil didaftarkan!
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Member Tab -->
+        <div id="edit-tab" class="tab-content hidden">
+            <div class="card">
+                <label class="label"><i class="fas fa-search"></i> Cari Member</label>
+                <div class="input-group">
+                    <input type="text" id="edit-member-id" class="input-field" placeholder="Masukkan ID Member">
+                    <button id="search-member" class="button button-secondary"><i class="fas fa-search"></i> Cari</button>
+                </div>
+                
+                <div id="edit-member-info" class="hidden">
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-id-card"></i> ID Member</label>
+                        <input type="text" id="edit-member-id-display" class="input-field" readonly>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-user"></i> Nama Lengkap</label>
+                        <input type="text" id="edit-member-name" class="input-field" placeholder="Nama member">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-map-marker-alt"></i> Alamat</label>
+                        <input type="text" id="edit-member-address" class="input-field" placeholder="Alamat member">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-phone"></i> Nomor HP</label>
+                        <input type="tel" id="edit-member-phone" class="input-field" placeholder="Nomor HP member">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="label"><i class="fas fa-coins"></i> Poin Member</label>
+                        <input type="number" id="edit-member-points" class="input-field" placeholder="Poin member">
+                    </div>
+                    
+                    <button id="update-member" class="button"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                    <button id="delete-member" class="button" style="background-color: var(--error-color);"><i class="fas fa-trash"></i> Hapus Member</button>
+                    <div id="edit-member-error" class="error-message hidden"></div>
+                    <div id="edit-member-success" class="success-message hidden">
+                        Data member berhasil diperbarui!
+                    </div>
+                </div>
+                
+                <div id="edit-member-not-found" class="error-message hidden">
+                    Member tidak ditemukan. Silakan coba ID yang lain.
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Password Modal -->
+    <div id="password-modal" class="password-modal hidden">
+        <div class="password-box">
+            <div class="password-title"><i class="fas fa-lock"></i> Masukkan Password</div>
+            <input type="password" id="password-input" class="input-field" placeholder="Password">
+            <button id="submit-password" class="button"><i class="fas fa-key"></i> Masuk</button>
+            <div id="password-error" class="error-message hidden"></div>
+        </div>
+    </div>
+
+    <!-- Notification -->
     <div id="notification" class="notification">
         <i class="fas fa-check-circle"></i>
         <span id="notification-text">Kode berhasil disalin!</span>
     </div>
 
     <footer>
-        &copy; 2025 Dolan Sawah Restaurant | <i class="fas fa-leaf"></i> by Ryan
+        &copy; 2025 Dolan Sawah Restaurant Group | <i class="fas fa-leaf"></i> Makanan Organik Berkualitas
     </footer>
 
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
 
     <script>
+        // Password yang dienkripsi (fusion437666)
+        const ENCRYPTED_PASSWORD = "U2FsdGVkX1+7Q7J5Z5J5Z5J5Z5J5Z5J5Z5J5Z5J5Z5J4=";
+        
         document.addEventListener('DOMContentLoaded', () => {
             // Tab navigation
             const tabs = document.querySelectorAll('.nav-tab');
             const tabContents = document.querySelectorAll('.tab-content');
             
             tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
+                tab.addEventListener('click', (e) => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Cek jika mencoba mengakses edit/add
+                    if (tabId === 'add' || tabId === 'edit') {
+                        e.preventDefault();
+                        showPasswordModal(tabId);
+                    } else {
+                        // Untuk tab biasa
+                        tabs.forEach(t => t.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.add('hidden'));
+                        
+                        tab.classList.add('active');
+                        document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Password modal
+            const passwordModal = document.getElementById('password-modal');
+            const passwordInput = document.getElementById('password-input');
+            const submitPassword = document.getElementById('submit-password');
+            const passwordError = document.getElementById('password-error');
+            let targetTab = '';
+            
+            function showPasswordModal(tab) {
+                targetTab = tab;
+                passwordModal.classList.remove('hidden');
+                passwordInput.focus();
+            }
+            
+            function hidePasswordModal() {
+                passwordModal.classList.add('hidden');
+                passwordInput.value = '';
+                passwordError.classList.add('hidden');
+            }
+            
+            function decryptPassword(encrypted) {
+                try {
+                    const bytes = CryptoJS.AES.decrypt(encrypted, 'dolan-sawah-secret');
+                    return bytes.toString(CryptoJS.enc.Utf8);
+                } catch (e) {
+                    return '';
+                }
+            }
+            
+            submitPassword.addEventListener('click', () => {
+                const inputPassword = passwordInput.value.trim();
+                const correctPassword = decryptPassword(ENCRYPTED_PASSWORD);
+                
+                if (inputPassword === correctPassword) {
+                    hidePasswordModal();
+                    
+                    // Buka tab yang diminta
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.add('hidden'));
                     
-                    tab.classList.add('active');
-                    const tabId = tab.getAttribute('data-tab') + '-tab';
-                    document.getElementById(tabId).classList.remove('hidden');
-                });
+                    document.querySelector(`.nav-tab[data-tab="${targetTab}"]`).classList.add('active');
+                    document.getElementById(`${targetTab}-tab`).classList.remove('hidden');
+                    
+                    showNotification("Password benar! Akses diberikan.");
+                } else {
+                    passwordError.textContent = "Password salah! Silakan coba lagi.";
+                    passwordError.classList.remove('hidden');
+                }
             });
 
             // Notification system
@@ -468,6 +702,162 @@
                     showNotification("ID berhasil dipaste");
                 } catch (err) {
                     showNotification("Gagal membaca clipboard");
+                }
+            });
+
+            // Member data functions
+            function loadMemberData(memberId) {
+                const members = JSON.parse(localStorage.getItem('vipMembers') || {};
+                const member = members[memberId];
+                
+                if (member) {
+                    document.getElementById('member-photo').src = member.photo || 'https://via.placeholder.com/100';
+                    document.getElementById('member-name').textContent = member.name || '-';
+                    document.getElementById('member-address').textContent = member.address || '-';
+                    document.getElementById('member-phone').textContent = member.phone || '-';
+                    document.getElementById('member-points').textContent = member.points || '0';
+                    
+                    document.getElementById('member-info-container').classList.remove('hidden');
+                    document.getElementById('member-not-found').classList.add('hidden');
+                } else {
+                    document.getElementById('member-info-container').classList.add('hidden');
+                    document.getElementById('member-not-found').classList.remove('hidden');
+                }
+            }
+
+            // Save transaction
+            document.getElementById('save-transaction').addEventListener('click', () => {
+                const amount = parseInt(document.getElementById('transaction-amount').value);
+                const memberId = document.getElementById('member-id-input').value;
+                
+                if (!amount || amount <= 0) {
+                    showNotification("Masukkan nominal transaksi yang valid");
+                    return;
+                }
+                
+                const members = JSON.parse(localStorage.getItem('vipMembers') || {});
+                if (members[memberId]) {
+                    const pointsToAdd = Math.floor(amount / 100000);
+                    members[memberId].points = (parseInt(members[memberId].points) || 0) + pointsToAdd;
+                    localStorage.setItem('vipMembers', JSON.stringify(members));
+                    
+                    document.getElementById('member-points').textContent = members[memberId].points;
+                    document.getElementById('transaction-amount').value = '';
+                    showNotification(`+${pointsToAdd} poin ditambahkan!`);
+                } else {
+                    showNotification("Member tidak ditemukan");
+                }
+            });
+
+            // Add new member
+            document.getElementById('save-member').addEventListener('click', () => {
+                const memberId = document.getElementById('new-member-id').value.trim();
+                const name = document.getElementById('new-member-name').value.trim();
+                const address = document.getElementById('new-member-address').value.trim();
+                const phone = document.getElementById('new-member-phone').value.trim();
+                
+                if (!memberId || !name) {
+                    showNotification("ID Member dan Nama harus diisi");
+                    return;
+                }
+                
+                const members = JSON.parse(localStorage.getItem('vipMembers') || {});
+                if (members[memberId]) {
+                    showNotification("ID Member sudah terdaftar");
+                    return;
+                }
+                
+                members[memberId] = {
+                    name,
+                    address,
+                    phone,
+                    points: 10 // Bonus 10 poin untuk member baru
+                };
+                
+                localStorage.setItem('vipMembers', JSON.stringify(members));
+                
+                // Reset form
+                document.getElementById('new-member-id').value = '';
+                document.getElementById('new-member-name').value = '';
+                document.getElementById('new-member-address').value = '';
+                document.getElementById('new-member-phone').value = '';
+                
+                document.getElementById('add-member-success').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('add-member-success').classList.add('hidden');
+                }, 3000);
+                
+                showNotification("Member baru berhasil didaftarkan!");
+            });
+
+            // Edit member functions
+            document.getElementById('search-member').addEventListener('click', () => {
+                const memberId = document.getElementById('edit-member-id').value.trim();
+                const members = JSON.parse(localStorage.getItem('vipMembers') || {});
+                const member = members[memberId];
+                
+                if (member) {
+                    document.getElementById('edit-member-id-display').value = memberId;
+                    document.getElementById('edit-member-name').value = member.name || '';
+                    document.getElementById('edit-member-address').value = member.address || '';
+                    document.getElementById('edit-member-phone').value = member.phone || '';
+                    document.getElementById('edit-member-points').value = member.points || '0';
+                    
+                    document.getElementById('edit-member-info').classList.remove('hidden');
+                    document.getElementById('edit-member-not-found').classList.add('hidden');
+                } else {
+                    document.getElementById('edit-member-info').classList.add('hidden');
+                    document.getElementById('edit-member-not-found').classList.remove('hidden');
+                }
+            });
+
+            document.getElementById('update-member').addEventListener('click', () => {
+                const memberId = document.getElementById('edit-member-id-display').value;
+                const name = document.getElementById('edit-member-name').value.trim();
+                const address = document.getElementById('edit-member-address').value.trim();
+                const phone = document.getElementById('edit-member-phone').value.trim();
+                const points = parseInt(document.getElementById('edit-member-points').value) || 0;
+                
+                if (!name) {
+                    showNotification("Nama harus diisi");
+                    return;
+                }
+                
+                const members = JSON.parse(localStorage.getItem('vipMembers') || {});
+                if (members[memberId]) {
+                    members[memberId] = {
+                        name,
+                        address,
+                        phone,
+                        points
+                    };
+                    
+                    localStorage.setItem('vipMembers', JSON.stringify(members));
+                    
+                    document.getElementById('edit-member-success').classList.remove('hidden');
+                    setTimeout(() => {
+                        document.getElementById('edit-member-success').classList.add('hidden');
+                    }, 3000);
+                    
+                    showNotification("Data member berhasil diperbarui!");
+                } else {
+                    showNotification("Member tidak ditemukan");
+                }
+            });
+
+            document.getElementById('delete-member').addEventListener('click', () => {
+                const memberId = document.getElementById('edit-member-id-display').value;
+                
+                if (confirm(`Apakah Anda yakin ingin menghapus member ${memberId}?`)) {
+                    const members = JSON.parse(localStorage.getItem('vipMembers') || {});
+                    delete members[memberId];
+                    localStorage.setItem('vipMembers', JSON.stringify(members));
+                    
+                    // Reset form
+                    document.getElementById('edit-member-id').value = '';
+                    document.getElementById('edit-member-info').classList.add('hidden');
+                    
+                    showNotification(`Member ${memberId} telah dihapus`);
                 }
             });
 
