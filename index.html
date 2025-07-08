@@ -492,9 +492,9 @@
         const ENCRYPTED_PASSWORD = "U2FsdGVkX19XW5f7Q7J5Z5J5Z5J5Z5J5Z5J5Z5J5Z5J4=";
         
         document.addEventListener('DOMContentLoaded', () => {
-            // Set tab default ke scan tanpa password
-            document.getElementById('scan-tab').classList.remove('hidden');
+            // Inisialisasi tab default ke scan
             document.querySelector('.nav-tab[data-tab="scan"]').classList.add('active');
+            document.getElementById('scan-tab').classList.remove('hidden');
 
             // Tab navigation
             const tabs = document.querySelectorAll('.nav-tab');
@@ -504,7 +504,7 @@
                 tab.addEventListener('click', (e) => {
                     const tabId = tab.getAttribute('data-tab');
                     
-                    // Cek jika mencoba mengakses edit/add
+                    // Hanya butuh password untuk add/edit
                     if (tabId === 'add' || tabId === 'edit') {
                         e.preventDefault();
                         showPasswordModal(tabId);
@@ -519,7 +519,7 @@
                 });
             });
 
-            // Password modal
+            // Password system yang sudah diperbaiki
             const passwordModal = document.getElementById('password-modal');
             const passwordInput = document.getElementById('password-input');
             const submitPassword = document.getElementById('submit-password');
@@ -540,13 +540,23 @@
             
             function decryptPassword(encrypted) {
                 try {
-                    const bytes = CryptoJS.AES.decrypt(encrypted, 'dolan-sawah-secret');
-                    const originalText = bytes.toString(CryptoJS.enc.Utf8);
+                    // Format: Salted__<salt><iv><encrypted>
+                    const salt = CryptoJS.enc.Hex.parse(encrypted.substr(8, 16));
+                    const iv = CryptoJS.enc.Hex.parse(encrypted.substr(24, 32));
+                    const encryptedText = encrypted.substring(56);
                     
-                    if (!originalText) {
-                        throw new Error('Invalid password format');
-                    }
-                    return originalText;
+                    const key = CryptoJS.PBKDF2("dolan-sawah-secret", salt, {
+                        keySize: 256/32,
+                        iterations: 1000
+                    });
+                    
+                    const decrypted = CryptoJS.AES.decrypt(
+                        { ciphertext: CryptoJS.enc.Base64.parse(encryptedText) },
+                        key,
+                        { iv: iv, padding: CryptoJS.pad.Pkcs7, mode: CryptoJS.mode.CBC }
+                    );
+                    
+                    return decrypted.toString(CryptoJS.enc.Utf8);
                 } catch (e) {
                     console.error('Decryption error:', e);
                     return '';
