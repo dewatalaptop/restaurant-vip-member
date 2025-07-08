@@ -6,7 +6,6 @@
     <title>Aplikasi VIP member Dolan Sawah</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
         :root {
@@ -268,35 +267,6 @@
             color: var(--primary-color);
         }
 
-        .password-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .password-box {
-            background-color: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 400px;
-            box-shadow: var(--box-shadow);
-        }
-
-        .password-title {
-            font-size: 1.3em;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
         @media (max-width: 540px) {
             body {
                 padding: 15px;
@@ -465,16 +435,6 @@
         </div>
     </div>
 
-    <!-- Password Modal -->
-    <div id="password-modal" class="password-modal hidden">
-        <div class="password-box">
-            <div class="password-title"><i class="fas fa-lock"></i> Masukkan Password</div>
-            <input type="password" id="password-input" class="input-field" placeholder="Password">
-            <button id="submit-password" class="button"><i class="fas fa-key"></i> Masuk</button>
-            <div id="password-error" class="error-message hidden"></div>
-        </div>
-    </div>
-
     <!-- Notification -->
     <div id="notification" class="notification">
         <i class="fas fa-check-circle"></i>
@@ -488,9 +448,6 @@
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
 
     <script>
-        // Password yang dienkripsi (fusion666)
-        const ENCRYPTED_PASSWORD = "U2FsdGVkX19XW5f7Q7J5Z5J5Z5J5Z5J5Z5J5Z5J5Z5J4=";
-        
         document.addEventListener('DOMContentLoaded', () => {
             // Inisialisasi tab default ke scan
             document.querySelector('.nav-tab[data-tab="scan"]').classList.add('active');
@@ -504,84 +461,13 @@
                 tab.addEventListener('click', (e) => {
                     const tabId = tab.getAttribute('data-tab');
                     
-                    // Hanya butuh password untuk add/edit
-                    if (tabId === 'add' || tabId === 'edit') {
-                        e.preventDefault();
-                        showPasswordModal(tabId);
-                    } else {
-                        // Untuk tab biasa
-                        tabs.forEach(t => t.classList.remove('active'));
-                        tabContents.forEach(c => c.classList.add('hidden'));
-                        
-                        tab.classList.add('active');
-                        document.getElementById(`${tabId}-tab`).classList.remove('hidden');
-                    }
-                });
-            });
-
-            // Password system yang sudah diperbaiki
-            const passwordModal = document.getElementById('password-modal');
-            const passwordInput = document.getElementById('password-input');
-            const submitPassword = document.getElementById('submit-password');
-            const passwordError = document.getElementById('password-error');
-            let targetTab = '';
-            
-            function showPasswordModal(tab) {
-                targetTab = tab;
-                passwordModal.classList.remove('hidden');
-                passwordInput.focus();
-            }
-            
-            function hidePasswordModal() {
-                passwordModal.classList.add('hidden');
-                passwordInput.value = '';
-                passwordError.classList.add('hidden');
-            }
-            
-            function decryptPassword(encrypted) {
-                try {
-                    // Format: Salted__<salt><iv><encrypted>
-                    const salt = CryptoJS.enc.Hex.parse(encrypted.substr(8, 16));
-                    const iv = CryptoJS.enc.Hex.parse(encrypted.substr(24, 32));
-                    const encryptedText = encrypted.substring(56);
-                    
-                    const key = CryptoJS.PBKDF2("dolan-sawah-secret", salt, {
-                        keySize: 256/32,
-                        iterations: 1000
-                    });
-                    
-                    const decrypted = CryptoJS.AES.decrypt(
-                        { ciphertext: CryptoJS.enc.Base64.parse(encryptedText) },
-                        key,
-                        { iv: iv, padding: CryptoJS.pad.Pkcs7, mode: CryptoJS.mode.CBC }
-                    );
-                    
-                    return decrypted.toString(CryptoJS.enc.Utf8);
-                } catch (e) {
-                    console.error('Decryption error:', e);
-                    return '';
-                }
-            }
-            
-            submitPassword.addEventListener('click', () => {
-                const inputPassword = passwordInput.value.trim();
-                const correctPassword = decryptPassword(ENCRYPTED_PASSWORD);
-                
-                if (inputPassword === correctPassword) {
-                    hidePasswordModal();
-                    
-                    // Buka tab yang diminta
+                    // Untuk semua tab
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.add('hidden'));
                     
-                    document.querySelector(`.nav-tab[data-tab="${targetTab}"]`).classList.add('active');
-                    document.getElementById(`${targetTab}-tab`).classList.remove('hidden');
-                    
-                    showNotification("Password benar! Akses diberikan.");
-                } else {
-                    passwordError.textContent = "Password salah! Silakan coba lagi.";
-                    passwordError.classList.remove('hidden');
-                }
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+                });
             });
 
             // Notification system
