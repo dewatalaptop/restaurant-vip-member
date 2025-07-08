@@ -489,9 +489,13 @@
 
     <script>
         // Password yang dienkripsi (fusion666)
-        const ENCRYPTED_PASSWORD = "U2FsdGVkX1+7Q7J5Z5J5Z5J5Z5J5Z5J5Z5J5Z5J5Z5J4=";
+        const ENCRYPTED_PASSWORD = "U2FsdGVkX19XW5f7Q7J5Z5J5Z5J5Z5J5Z5J5Z5J5Z5J4=";
         
         document.addEventListener('DOMContentLoaded', () => {
+            // Set tab default ke scan tanpa password
+            document.getElementById('scan-tab').classList.remove('hidden');
+            document.querySelector('.nav-tab[data-tab="scan"]').classList.add('active');
+
             // Tab navigation
             const tabs = document.querySelectorAll('.nav-tab');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -537,8 +541,14 @@
             function decryptPassword(encrypted) {
                 try {
                     const bytes = CryptoJS.AES.decrypt(encrypted, 'dolan-sawah-secret');
-                    return bytes.toString(CryptoJS.enc.Utf8);
+                    const originalText = bytes.toString(CryptoJS.enc.Utf8);
+                    
+                    if (!originalText) {
+                        throw new Error('Invalid password format');
+                    }
+                    return originalText;
                 } catch (e) {
+                    console.error('Decryption error:', e);
                     return '';
                 }
             }
