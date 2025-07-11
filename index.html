@@ -307,7 +307,6 @@
             <div class="nav-tab" data-tab="edit"><i class="fas fa-user-edit"></i> Edit</div>
         </div>
 
-        <!-- Scan QR Code Tab -->
         <div id="scan-tab" class="tab-content">
             <div id="reader-container">
                 <div id="reader"></div>
@@ -325,7 +324,6 @@
             </div>
         </div>
 
-        <!-- Member Area Tab -->
         <div id="member-tab" class="tab-content hidden">
             <div class="card">
                 <label class="label"><i class="fas fa-id-card"></i> ID Member</label>
@@ -354,7 +352,6 @@
             </div>
         </div>
 
-        <!-- Add Member Tab -->
         <div id="add-tab" class="tab-content hidden">
             <div class="card">
                 <div class="input-group">
@@ -385,7 +382,6 @@
             </div>
         </div>
 
-        <!-- Edit Member Tab -->
         <div id="edit-tab" class="tab-content hidden">
             <div class="card">
                 <label class="label"><i class="fas fa-search"></i> Cari Member</label>
@@ -435,7 +431,6 @@
         </div>
     </div>
 
-    <!-- Notification -->
     <div id="notification" class="notification">
         <i class="fas fa-check-circle"></i>
         <span id="notification-text">Kode berhasil disalin!</span>
@@ -461,7 +456,6 @@
                 tab.addEventListener('click', (e) => {
                     const tabId = tab.getAttribute('data-tab');
                     
-                    // Untuk semua tab
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.add('hidden'));
                     
@@ -494,12 +488,9 @@
 
             async function initializeScanner() {
                 try {
-                    // Cek dukungan kamera
                     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                         throw new Error("Browser tidak mendukung akses kamera");
                     }
-
-                    // Permintaan izin kamera terlebih dahulu
                     const stream = await navigator.mediaDevices.getUserMedia({
                         video: {
                             facingMode: "environment",
@@ -507,31 +498,18 @@
                             height: { ideal: 720 }
                         }
                     });
-
-                    // Hentikan stream karena library akan membuat stream sendiri
                     stream.getTracks().forEach(track => track.stop());
 
-                    // Inisialisasi scanner
                     const html5QrcodeScanner = new Html5QrcodeScanner(
                         "reader",
                         { 
                             fps: 10,
                             qrbox: { width: 250, height: 250 },
-                            aspectRatio: 1.0,
-                            disableFlip: false,
-                            videoConstraints: {
-                                facingMode: "environment",
-                                width: { min: 640, ideal: 1280, max: 1920 },
-                                height: { min: 480, ideal: 720, max: 1080 }
-                            },
-                            rememberLastUsedCamera: true,
                             supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
                         },
-                        true // verbose mode
+                        false
                     );
-
                     html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-                    
                 } catch (error) {
                     console.error("Scanner Error:", error);
                     showNotification(`Error: ${error.message}`);
@@ -542,11 +520,8 @@
             function onScanSuccess(decodedText, decodedResult) {
                 if (decodedText !== lastResult) {
                     lastResult = decodedText;
-                    
                     resultDisplay.textContent = decodedText;
                     copyButton.disabled = false;
-                    
-                    // Auto copy to clipboard
                     navigator.clipboard.writeText(decodedText)
                         .then(() => showNotification("Kode berhasil disalin!"))
                         .catch(err => console.error("Copy failed:", err));
@@ -554,34 +529,21 @@
             }
 
             function onScanFailure(error) {
-                let errorMsg = "Error memindai QR Code";
-                if (error && error.message) {
-                    errorMsg = error.message;
-                    
-                    if (error.name === 'NotAllowedError') {
-                        errorMsg = "Izin kamera ditolak. Harap berikan izin kamera.";
-                    } else if (error.name === 'NotFoundError') {
-                        errorMsg = "Kamera tidak ditemukan";
-                    }
-                }
-                
-                console.error('Scan Error:', error);
-                showNotification(errorMsg);
-                document.getElementById('manual-input-section').style.display = 'block';
+                // Tidak melakukan apa-apa agar tidak menampilkan notifikasi error terus menerus
             }
 
-            // Workaround khusus Android untuk masalah izin
-            if (isAndroid) {
-                document.addEventListener('click', function androidCameraWorkaround() {
-                    initializeScanner();
-                    document.removeEventListener('click', androidCameraWorkaround);
+            if (isAndroid || isIOS) {
+                // Untuk mobile, inisialisasi setelah user berinteraksi
+                document.addEventListener('click', function mobileCameraWorkaround() {
+                    if (!document.querySelector('#reader video')) {
+                        initializeScanner();
+                    }
+                    document.removeEventListener('click', mobileCameraWorkaround);
                 }, { once: true });
             } else {
-                // Untuk iOS dan desktop, langsung inisialisasi
                 initializeScanner();
             }
 
-            // Fallback input manual
             document.getElementById('submit-manual').addEventListener('click', () => {
                 const manualCode = document.getElementById('manual-qr-input').value.trim();
                 if (manualCode) {
@@ -592,7 +554,6 @@
                 }
             });
 
-            // Copy button functionality
             copyButton.addEventListener('click', () => {
                 if (!lastResult) return;
                 navigator.clipboard.writeText(lastResult)
@@ -600,14 +561,29 @@
                     .catch(err => showNotification("Gagal menyalin kode"));
             });
 
-            // Paste button functionality
             document.getElementById('paste-member-id').addEventListener('click', async () => {
                 try {
                     const text = await navigator.clipboard.readText();
-                    document.getElementById('member-id-input').value = text;
+                    const memberIdInput = document.getElementById('member-id-input');
+                    memberIdInput.value = text;
+                    memberIdInput.dispatchEvent(new Event('input')); // Picu event input untuk load data
                     showNotification("ID berhasil dipaste");
                 } catch (err) {
                     showNotification("Gagal membaca clipboard");
+                }
+            });
+            
+            // ==========================================================
+            // === PERBAIKAN 1: OTOMATIS LOAD DATA MEMBER SAAT DIKETIK ===
+            // ==========================================================
+            const memberIdInput = document.getElementById('member-id-input');
+            memberIdInput.addEventListener('input', () => {
+                const memberId = memberIdInput.value.trim();
+                if (memberId) {
+                    loadMemberData(memberId);
+                } else {
+                    document.getElementById('member-info-container').classList.add('hidden');
+                    document.getElementById('member-not-found').classList.add('hidden');
                 }
             });
 
@@ -631,7 +607,6 @@
                 }
             }
 
-            // Save transaction
             document.getElementById('save-transaction').addEventListener('click', () => {
                 const amount = parseInt(document.getElementById('transaction-amount').value);
                 const memberId = document.getElementById('member-id-input').value;
@@ -643,7 +618,7 @@
                 
                 const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
                 if (members[memberId]) {
-                    const pointsToAdd = Math.floor(amount / 100000);
+                    const pointsToAdd = Math.floor(amount / 10000); // Misal: 1 poin per Rp 10.000
                     members[memberId].points = (parseInt(members[memberId].points) || 0) + pointsToAdd;
                     localStorage.setItem('vipMembers', JSON.stringify(members));
                     
@@ -655,7 +630,9 @@
                 }
             });
 
-            // Add new member
+            // =================================================================
+            // === PERBAIKAN 2: ALUR TAMBAH MEMBER DENGAN FEEDBACK LANGSUNG ===
+            // =================================================================
             document.getElementById('save-member').addEventListener('click', () => {
                 const memberId = document.getElementById('new-member-id').value.trim();
                 const name = document.getElementById('new-member-name').value.trim();
@@ -682,18 +659,19 @@
                 
                 localStorage.setItem('vipMembers', JSON.stringify(members));
                 
-                // Reset form
+                // Reset form tambah member
                 document.getElementById('new-member-id').value = '';
                 document.getElementById('new-member-name').value = '';
                 document.getElementById('new-member-address').value = '';
                 document.getElementById('new-member-phone').value = '';
                 
-                document.getElementById('add-member-success').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('add-member-success').classList.add('hidden');
-                }, 3000);
-                
                 showNotification("Member baru berhasil didaftarkan!");
+
+                // Otomatis pindah ke tab member dan tampilkan data baru
+                document.querySelector('.nav-tab[data-tab="member"]').click();
+                const memberIdInput = document.getElementById('member-id-input');
+                memberIdInput.value = memberId;
+                memberIdInput.dispatchEvent(new Event('input'));
             });
 
             // Edit member functions
@@ -740,11 +718,6 @@
                     
                     localStorage.setItem('vipMembers', JSON.stringify(members));
                     
-                    document.getElementById('edit-member-success').classList.remove('hidden');
-                    setTimeout(() => {
-                        document.getElementById('edit-member-success').classList.add('hidden');
-                    }, 3000);
-                    
                     showNotification("Data member berhasil diperbarui!");
                 } else {
                     showNotification("Member tidak ditemukan");
@@ -764,15 +737,6 @@
                     document.getElementById('edit-member-info').classList.add('hidden');
                     
                     showNotification(`Member ${memberId} telah dihapus`);
-                }
-            });
-
-            // Reload halaman ketika kembali ke tab (untuk Android)
-            window.addEventListener('focus', () => {
-                if (isAndroid && document.querySelector('.nav-tab.active').dataset.tab === 'scan') {
-                    if (!document.querySelector('#reader video')) {
-                        window.location.reload();
-                    }
                 }
             });
         });
