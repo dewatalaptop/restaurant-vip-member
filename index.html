@@ -86,6 +86,7 @@
         #reader {
             width: 100%;
             height: 100%;
+            border-radius: 9px; /* Rounded corners for the video feed */
         }
 
         #manual-input-section {
@@ -258,6 +259,7 @@
             display: block;
             margin-left: auto;
             margin-right: auto;
+            background-color: #f1f8e9;
         }
 
         .member-detail {
@@ -317,13 +319,12 @@
         <div id="scan-tab" class="tab-content">
             <div id="reader-container">
                 <div id="reader"></div>
-                <div id="manual-input-section">
-                    <p>Scanner tidak tersedia, masukkan kode manual:</p>
-                    <input type="text" id="manual-qr-input" class="input-field" placeholder="Masukkan kode QR">
-                    <button id="submit-manual" class="button">Submit</button>
-                </div>
             </div>
-            
+            <div id="manual-input-section" class="card" style="display: none;">
+                <p>Scanner tidak dapat diakses. Masukkan kode manual:</p>
+                <input type="text" id="manual-qr-input" class="input-field" placeholder="Masukkan kode QR">
+                <button id="submit-manual" class="button">Submit</button>
+            </div>
             <div class="card">
                 <label class="label"><i class="fas fa-qrcode"></i> Hasil Pindaian QR Code</label>
                 <div id="result-display">Belum ada kode yang dipindai...</div>
@@ -335,12 +336,12 @@
             <div class="card">
                 <label class="label"><i class="fas fa-id-card"></i> ID Member</label>
                 <div class="input-group">
-                    <input type="text" id="member-id-input" class="input-field" placeholder="Masukkan ID Member">
+                    <input type="text" id="member-id-input" class="input-field" placeholder="Ketik atau paste ID Member di sini">
                     <button id="paste-member-id" class="button button-secondary"><i class="fas fa-paste"></i> Paste ID</button>
                 </div>
                 
                 <div id="member-info-container" class="member-info hidden">
-                    <img id="member-photo" class="member-photo" src="https://via.placeholder.com/100" alt="Foto Member">
+                    <img id="member-photo" class="member-photo" src="" alt="Foto Member">
                     <div class="member-detail"><strong>Nama:</strong> <span id="member-name"></span></div>
                     <div class="member-detail"><strong>Alamat:</strong> <span id="member-address"></span></div>
                     <div class="member-detail"><strong>No. HP:</strong> <span id="member-phone"></span></div>
@@ -361,7 +362,7 @@
 
         <div id="add-tab" class="tab-content hidden">
             <div class="card">
-                 <img id="add-photo-preview" class="photo-preview" src="https://via.placeholder.com/100" alt="Pratinjau Foto">
+                <img id="add-photo-preview" class="photo-preview" src="https://via.placeholder.com/100" alt="Pratinjau Foto">
                 <div class="input-group">
                     <label class="label"><i class="fas fa-camera"></i> Unggah Foto</label>
                     <input type="file" id="add-member-photo" class="input-field" accept="image/*">
@@ -400,7 +401,7 @@
                 </div>
                 
                 <div id="edit-member-info" class="hidden">
-                     <img id="edit-photo-preview" class="photo-preview" src="https://via.placeholder.com/100" alt="Pratinjau Foto">
+                    <img id="edit-photo-preview" class="photo-preview" src="https://via.placeholder.com/100" alt="Pratinjau Foto">
                     <div class="input-group">
                         <label class="label"><i class="fas fa-camera"></i> Ganti Foto</label>
                         <input type="file" id="edit-member-photo" class="input-field" accept="image/*">
@@ -457,53 +458,84 @@
         document.addEventListener('DOMContentLoaded', () => {
             const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/100';
             
-            // Inisialisasi tab default ke scan
+            let html5QrcodeScanner;
+
+            // Inisialisasi tab default
             document.querySelector('.nav-tab[data-tab="scan"]').classList.add('active');
             document.getElementById('scan-tab').classList.remove('hidden');
+            
+            // --- FUNGSI PENGELOLA SCANNER ---
+            function startScanner() {
+                if (!html5QrcodeScanner || html5QrcodeScanner.getState() === Html5QrcodeScannerState.NOT_STARTED) {
+                    html5QrcodeScanner = new Html5QrcodeScanner(
+                        "reader", 
+                        { 
+                            fps: 10, 
+                            qrbox: { width: 250, height: 250 },
+                            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                        },
+                        false
+                    );
+                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                }
+            }
+            
+            function stopScanner() {
+                if (html5QrcodeScanner && html5QrcodeScanner.getState() === Html5QrcodeScannerState.SCANNING) {
+                    html5QrcodeScanner.clear().catch(error => {
+                        // console.error("Gagal menghentikan scanner.", error);
+                    });
+                }
+            }
 
-            // Tab navigation
+            // --- LOGIKA NAVIGASI TAB ---
             const tabs = document.querySelectorAll('.nav-tab');
             const tabContents = document.querySelectorAll('.tab-content');
             
             tabs.forEach(tab => {
-                tab.addEventListener('click', (e) => {
+                tab.addEventListener('click', () => {
                     const tabId = tab.getAttribute('data-tab');
+
+                    stopScanner();
                     
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.add('hidden'));
                     
                     tab.classList.add('active');
                     document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+                    
+                    if (tabId === 'scan') {
+                        startScanner();
+                    }
                 });
             });
 
-            // Notification system
+            // Jalankan scanner saat halaman pertama kali dimuat
+            try {
+                startScanner();
+            } catch (e) {
+                console.error("Gagal inisialisasi scanner awal:", e);
+                document.getElementById('reader-container').style.display = 'none';
+                document.getElementById('manual-input-section').style.display = 'block';
+            }
+
+            // --- FUNGSI UTILITAS LAINNYA ---
             function showNotification(message) {
                 const notification = document.getElementById('notification');
                 const notificationText = document.getElementById('notification-text');
-                
                 notificationText.textContent = message;
                 notification.classList.add('show');
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
+                setTimeout(() => notification.classList.remove('show'), 3000);
             }
 
-            // ===================================
-            // === FUNGSI BARU: PREVIEW FOTO ===
-            // ===================================
             function setupPhotoPreview(inputId, previewId) {
                 const inputElement = document.getElementById(inputId);
                 const previewElement = document.getElementById(previewId);
-
                 inputElement.addEventListener('change', () => {
                     const file = inputElement.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = (e) => {
-                            previewElement.src = e.target.result;
-                        };
+                        reader.onload = e => { previewElement.src = e.target.result; };
                         reader.readAsDataURL(file);
                     }
                 });
@@ -512,16 +544,38 @@
             setupPhotoPreview('add-member-photo', 'add-photo-preview');
             setupPhotoPreview('edit-member-photo', 'edit-photo-preview');
 
-            // QR Code Scanner functionality
+            // --- FUNGSI SCANNER CALLBACK ---
             const resultDisplay = document.getElementById('result-display');
             const copyButton = document.getElementById('copy-button');
             let lastResult = '';
 
-            async function initializeScanner() {
-                // ... (Fungsi scanner tidak berubah)
+            function onScanSuccess(decodedText) {
+                if (decodedText !== lastResult) {
+                    lastResult = decodedText;
+                    resultDisplay.textContent = decodedText;
+                    copyButton.disabled = false;
+                    navigator.clipboard.writeText(decodedText)
+                        .then(() => showNotification("Kode berhasil disalin!"))
+                        .catch(err => console.error("Gagal menyalin.", err));
+                }
             }
-            // ... (Kode scanner lainnya tidak berubah)
 
+            function onScanFailure(error) {
+                // Biarkan kosong agar tidak mengganggu dengan notifikasi error terus-menerus
+            }
+            
+            // --- EVENT LISTENERS LAINNYA ---
+            document.getElementById('submit-manual').addEventListener('click', () => {
+                const manualCode = document.getElementById('manual-qr-input').value.trim();
+                if (manualCode) onScanSuccess(manualCode);
+            });
+            
+            copyButton.addEventListener('click', () => {
+                if (!lastResult) return;
+                navigator.clipboard.writeText(lastResult)
+                    .then(() => showNotification("Kode berhasil disalin!"))
+                    .catch(() => showNotification("Gagal menyalin kode"));
+            });
 
             document.getElementById('paste-member-id').addEventListener('click', async () => {
                 try {
@@ -535,9 +589,8 @@
                 }
             });
             
-            const memberIdInput = document.getElementById('member-id-input');
-            memberIdInput.addEventListener('input', () => {
-                const memberId = memberIdInput.value.trim();
+            document.getElementById('member-id-input').addEventListener('input', (e) => {
+                const memberId = e.target.value.trim();
                 if (memberId) {
                     loadMemberData(memberId);
                 } else {
@@ -546,24 +599,33 @@
                 }
             });
 
-            // Member data functions
+            // --- FUNGSI CRUD MEMBER ---
+            function getMembers() {
+                return JSON.parse(localStorage.getItem('vipMembers') || '{}');
+            }
+
+            function saveMembers(members) {
+                localStorage.setItem('vipMembers', JSON.stringify(members));
+            }
+            
             function loadMemberData(memberId) {
-                const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                const members = getMembers();
                 const member = members[memberId];
                 
+                const infoContainer = document.getElementById('member-info-container');
+                const notFound = document.getElementById('member-not-found');
+                
                 if (member) {
-                    // MODIFIKASI: Load foto dari data member
                     document.getElementById('member-photo').src = member.photo || PLACEHOLDER_IMAGE;
                     document.getElementById('member-name').textContent = member.name || '-';
                     document.getElementById('member-address').textContent = member.address || '-';
                     document.getElementById('member-phone').textContent = member.phone || '-';
                     document.getElementById('member-points').textContent = member.points || '0';
-                    
-                    document.getElementById('member-info-container').classList.remove('hidden');
-                    document.getElementById('member-not-found').classList.add('hidden');
+                    infoContainer.classList.remove('hidden');
+                    notFound.classList.add('hidden');
                 } else {
-                    document.getElementById('member-info-container').classList.add('hidden');
-                    document.getElementById('member-not-found').classList.remove('hidden');
+                    infoContainer.classList.add('hidden');
+                    notFound.classList.remove('hidden');
                 }
             }
 
@@ -576,11 +638,11 @@
                     return;
                 }
                 
-                const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                const members = getMembers();
                 if (members[memberId]) {
-                    const pointsToAdd = Math.floor(amount / 10000);
+                    const pointsToAdd = Math.floor(amount / 10000); // 1 poin per Rp 10.000
                     members[memberId].points = (parseInt(members[memberId].points) || 0) + pointsToAdd;
-                    localStorage.setItem('vipMembers', JSON.stringify(members));
+                    saveMembers(members);
                     
                     document.getElementById('member-points').textContent = members[memberId].points;
                     document.getElementById('transaction-amount').value = '';
@@ -590,58 +652,50 @@
                 }
             });
 
-            // MODIFIKASI: Fungsi simpan member dengan data foto
             document.getElementById('save-member').addEventListener('click', () => {
                 const memberId = document.getElementById('new-member-id').value.trim();
                 const name = document.getElementById('new-member-name').value.trim();
                 const address = document.getElementById('new-member-address').value.trim();
                 const phone = document.getElementById('new-member-phone').value.trim();
-                const photoData = document.getElementById('add-photo-preview').src; // Ambil data foto (Base64)
+                const photoData = document.getElementById('add-photo-preview').src;
                 
                 if (!memberId || !name) {
                     showNotification("ID Member dan Nama harus diisi");
                     return;
                 }
                 
-                const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                const members = getMembers();
                 if (members[memberId]) {
                     showNotification("ID Member sudah terdaftar");
                     return;
                 }
                 
-                members[memberId] = {
-                    name,
-                    address,
-                    phone,
-                    photo: photoData, // Simpan data foto
-                    points: 10
-                };
+                members[memberId] = { name, address, phone, photo: photoData, points: 10 };
+                saveMembers(members);
                 
-                localStorage.setItem('vipMembers', JSON.stringify(members));
-                
-                // Reset form tambah member
                 document.getElementById('new-member-id').value = '';
                 document.getElementById('new-member-name').value = '';
                 document.getElementById('new-member-address').value = '';
                 document.getElementById('new-member-phone').value = '';
-                document.getElementById('add-member-photo').value = ''; // Reset input file
-                document.getElementById('add-photo-preview').src = PLACEHOLDER_IMAGE; // Reset preview
+                document.getElementById('add-member-photo').value = '';
+                document.getElementById('add-photo-preview').src = PLACEHOLDER_IMAGE;
                 
                 showNotification("Member baru berhasil didaftarkan!");
 
-                // Otomatis pindah ke tab member dan tampilkan data baru
                 document.querySelector('.nav-tab[data-tab="member"]').click();
                 const memberIdInput = document.getElementById('member-id-input');
                 memberIdInput.value = memberId;
                 memberIdInput.dispatchEvent(new Event('input'));
             });
 
-            // MODIFIKASI: Fungsi cari member untuk menampilkan foto di form edit
             document.getElementById('search-member').addEventListener('click', () => {
                 const memberId = document.getElementById('edit-search-id').value.trim();
-                const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                const members = getMembers();
                 const member = members[memberId];
                 
+                const editInfo = document.getElementById('edit-member-info');
+                const notFound = document.getElementById('edit-member-not-found');
+
                 if (member) {
                     document.getElementById('edit-photo-preview').src = member.photo || PLACEHOLDER_IMAGE;
                     document.getElementById('edit-member-id-display').value = memberId;
@@ -649,40 +703,31 @@
                     document.getElementById('edit-member-address').value = member.address || '';
                     document.getElementById('edit-member-phone').value = member.phone || '';
                     document.getElementById('edit-member-points').value = member.points || '0';
-                    
-                    document.getElementById('edit-member-info').classList.remove('hidden');
-                    document.getElementById('edit-member-not-found').classList.add('hidden');
+                    editInfo.classList.remove('hidden');
+                    notFound.classList.add('hidden');
                 } else {
-                    document.getElementById('edit-member-info').classList.add('hidden');
-                    document.getElementById('edit-member-not-found').classList.remove('hidden');
+                    editInfo.classList.add('hidden');
+                    notFound.classList.remove('hidden');
                 }
             });
 
-            // MODIFIKASI: Fungsi update member dengan data foto
             document.getElementById('update-member').addEventListener('click', () => {
                 const memberId = document.getElementById('edit-member-id-display').value;
                 const name = document.getElementById('edit-member-name').value.trim();
                 const address = document.getElementById('edit-member-address').value.trim();
                 const phone = document.getElementById('edit-member-phone').value.trim();
                 const points = parseInt(document.getElementById('edit-member-points').value) || 0;
-                const photoData = document.getElementById('edit-photo-preview').src; // Ambil data foto
+                const photoData = document.getElementById('edit-photo-preview').src;
                 
                 if (!name) {
                     showNotification("Nama harus diisi");
                     return;
                 }
                 
-                const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                const members = getMembers();
                 if (members[memberId]) {
-                    members[memberId] = {
-                        name,
-                        address,
-                        phone,
-                        points,
-                        photo: photoData // Simpan data foto yang baru
-                    };
-                    
-                    localStorage.setItem('vipMembers', JSON.stringify(members));
+                    members[memberId] = { name, address, phone, points, photo: photoData };
+                    saveMembers(members);
                     showNotification("Data member berhasil diperbarui!");
                 } else {
                     showNotification("Member tidak ditemukan");
@@ -691,16 +736,12 @@
 
             document.getElementById('delete-member').addEventListener('click', () => {
                 const memberId = document.getElementById('edit-member-id-display').value;
-                
                 if (confirm(`Apakah Anda yakin ingin menghapus member ${memberId}?`)) {
-                    const members = JSON.parse(localStorage.getItem('vipMembers') || '{}');
+                    const members = getMembers();
                     delete members[memberId];
-                    localStorage.setItem('vipMembers', JSON.stringify(members));
-                    
-                    // Reset form
+                    saveMembers(members);
                     document.getElementById('edit-search-id').value = '';
                     document.getElementById('edit-member-info').classList.add('hidden');
-                    
                     showNotification(`Member ${memberId} telah dihapus`);
                 }
             });
