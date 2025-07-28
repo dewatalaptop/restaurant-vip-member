@@ -86,7 +86,7 @@
         #reader {
             width: 100%;
             height: 100%;
-            border-radius: 9px; /* Rounded corners for the video feed */
+            border-radius: 9px;
         }
 
         #manual-input-section {
@@ -122,7 +122,7 @@
             text-align: left;
         }
 
-        .input-field {
+        .input-field, textarea {
             width: 100%;
             padding: 12px;
             font-size: 1em;
@@ -132,9 +132,10 @@
             margin-bottom: 5px;
             transition: border 0.3s ease;
             background-color: #f1f8e9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .input-field:focus {
+        .input-field:focus, textarea:focus {
             border-color: var(--primary-color);
             outline: none;
             box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
@@ -219,15 +220,16 @@
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
-            gap: 10px;
+            gap: 5px;
             background-color: white;
-            padding: 10px;
+            padding: 8px;
             border-radius: 50px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
         }
 
         .nav-tab {
-            padding: 10px 20px;
+            padding: 10px 18px;
             background-color: #e8f5e9;
             border-radius: 30px;
             cursor: pointer;
@@ -235,6 +237,7 @@
             transition: all 0.3s ease;
             color: var(--dark-text-color);
             border: 2px solid transparent;
+            font-size: 0.9em;
         }
 
         .nav-tab.active {
@@ -276,6 +279,60 @@
             margin-top: 5px;
         }
 
+        /* --- STYLES FOR NEW FEATURES --- */
+        #all-members-list {
+            text-align: left;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .member-list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .member-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .member-list-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .member-list-info {
+            flex-grow: 1;
+        }
+        
+        .member-list-info p {
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .admin-section textarea {
+            min-height: 150px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+        
+        .warning-text {
+            font-size: 0.9em;
+            color: var(--error-color);
+            margin-bottom: 10px;
+            background-color: #ffcdd2;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: left;
+        }
+        /* --- END OF NEW STYLES --- */
+
+
         @media (max-width: 540px) {
             body {
                 padding: 15px;
@@ -287,16 +344,7 @@
                 font-size: 1em;
             }
             .nav-tabs {
-                flex-direction: row;
-                overflow-x: auto;
-                padding: 8px;
-                justify-content: flex-start;
-                border-radius: 12px;
-            }
-            .nav-tab {
-                white-space: nowrap;
-                padding: 8px 15px;
-                font-size: 0.9em;
+                justify-content: center;
             }
         }
     </style>
@@ -310,10 +358,12 @@
         </header>
 
         <div class="nav-tabs">
-            <div class="nav-tab active" data-tab="scan"><i class="fas fa-qrcode"></i> Scan QR</div>
+            <div class="nav-tab active" data-tab="scan"><i class="fas fa-qrcode"></i> Scan</div>
             <div class="nav-tab" data-tab="member"><i class="fas fa-users"></i> Member</div>
             <div class="nav-tab" data-tab="add"><i class="fas fa-user-plus"></i> Tambah</div>
             <div class="nav-tab" data-tab="edit"><i class="fas fa-user-edit"></i> Edit</div>
+            <div class="nav-tab" data-tab="list"><i class="fas fa-list-ul"></i> Daftar</div>
+            <div class="nav-tab" data-tab="admin"><i class="fas fa-cogs"></i> Admin</div>
         </div>
 
         <div id="scan-tab" class="tab-content">
@@ -346,6 +396,7 @@
                     <div class="member-detail"><strong>Alamat:</strong> <span id="member-address"></span></div>
                     <div class="member-detail"><strong>No. HP:</strong> <span id="member-phone"></span></div>
                     <div class="member-detail"><strong>Poin:</strong> <span id="member-points"></span></div>
+                    <div class="member-detail"><strong>Benefit:</strong> <span id="member-benefit"></span></div>
                     
                     <div class="input-group">
                         <label class="label"><i class="fas fa-money-bill-wave"></i> Nominal Transaksi</label>
@@ -367,31 +418,30 @@
                     <label class="label"><i class="fas fa-camera"></i> Unggah Foto</label>
                     <input type="file" id="add-member-photo" class="input-field" accept="image/*">
                 </div>
-                
                 <div class="input-group">
                     <label class="label"><i class="fas fa-id-card"></i> ID Member Baru</label>
                     <input type="text" id="new-member-id" class="input-field" placeholder="Masukkan ID Member baru">
                 </div>
-                
                 <div class="input-group">
                     <label class="label"><i class="fas fa-user"></i> Nama Lengkap</label>
                     <input type="text" id="new-member-name" class="input-field" placeholder="Masukkan nama lengkap">
                 </div>
-                
                 <div class="input-group">
                     <label class="label"><i class="fas fa-map-marker-alt"></i> Alamat</label>
                     <input type="text" id="new-member-address" class="input-field" placeholder="Masukkan alamat">
                 </div>
-                
                 <div class="input-group">
                     <label class="label"><i class="fas fa-phone"></i> Nomor HP</label>
                     <input type="tel" id="new-member-phone" class="input-field" placeholder="Masukkan nomor HP">
                 </div>
-                
+                 <div class="input-group">
+                    <label class="label"><i class="fas fa-gift"></i> Benefit Member</label>
+                    <input type="text" id="new-member-benefit" class="input-field" placeholder="Contoh: Diskon 10% Minuman">
+                </div>
                 <button id="save-member" class="button"><i class="fas fa-save"></i> Simpan Member Baru</button>
             </div>
         </div>
-
+        
         <div id="edit-tab" class="tab-content hidden">
             <div class="card">
                 <label class="label"><i class="fas fa-search"></i> Cari Member</label>
@@ -399,48 +449,69 @@
                     <input type="text" id="edit-search-id" class="input-field" placeholder="Masukkan ID Member">
                     <button id="search-member" class="button button-secondary"><i class="fas fa-search"></i> Cari</button>
                 </div>
-                
                 <div id="edit-member-info" class="hidden">
                     <img id="edit-photo-preview" class="photo-preview" src="https://via.placeholder.com/100" alt="Pratinjau Foto">
                     <div class="input-group">
                         <label class="label"><i class="fas fa-camera"></i> Ganti Foto</label>
                         <input type="file" id="edit-member-photo" class="input-field" accept="image/*">
                     </div>
-                    
                     <div class="input-group">
                         <label class="label"><i class="fas fa-id-card"></i> ID Member</label>
                         <input type="text" id="edit-member-id-display" class="input-field" readonly>
                     </div>
-                    
                     <div class="input-group">
                         <label class="label"><i class="fas fa-user"></i> Nama Lengkap</label>
                         <input type="text" id="edit-member-name" class="input-field" placeholder="Nama member">
                     </div>
-                    
                     <div class="input-group">
                         <label class="label"><i class="fas fa-map-marker-alt"></i> Alamat</label>
                         <input type="text" id="edit-member-address" class="input-field" placeholder="Alamat member">
                     </div>
-                    
                     <div class="input-group">
                         <label class="label"><i class="fas fa-phone"></i> Nomor HP</label>
                         <input type="tel" id="edit-member-phone" class="input-field" placeholder="Nomor HP member">
                     </div>
-                    
+                     <div class="input-group">
+                        <label class="label"><i class="fas fa-gift"></i> Benefit Member</label>
+                        <input type="text" id="edit-member-benefit" class="input-field" placeholder="Benefit member">
+                    </div>
                     <div class="input-group">
                         <label class="label"><i class="fas fa-coins"></i> Poin Member</label>
                         <input type="number" id="edit-member-points" class="input-field" placeholder="Poin member">
                     </div>
-                    
                     <button id="update-member" class="button"><i class="fas fa-save"></i> Simpan Perubahan</button>
                     <button id="delete-member" class="button" style="background-color: var(--error-color);"><i class="fas fa-trash"></i> Hapus Member</button>
                 </div>
-                
                 <div id="edit-member-not-found" class="error-message hidden">
                     Member tidak ditemukan. Silakan coba ID yang lain.
                 </div>
             </div>
         </div>
+
+        <div id="list-tab" class="tab-content hidden">
+            <div class="card">
+                <label class="label"><i class="fas fa-users"></i> Daftar Semua Member</label>
+                <div id="all-members-list">
+                    <p>Memuat data member...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="admin-tab" class="tab-content hidden">
+             <div class="card admin-section">
+                <label class="label"><i class="fas fa-file-export"></i> Ekspor Data</label>
+                <p>Salin teks di bawah ini untuk mem-backup atau memindahkan data ke perangkat lain.</p>
+                <textarea id="export-output" readonly placeholder="Klik tombol 'Ekspor Data' untuk menampilkan data di sini..."></textarea>
+                <button id="export-data" class="button button-secondary"><i class="fas fa-upload"></i> Ekspor Data</button>
+            </div>
+            <div class="card admin-section">
+                <label class="label"><i class="fas fa-file-import"></i> Impor Data</label>
+                <div class="warning-text"><i class="fas fa-exclamation-triangle"></i> <strong>Perhatian:</strong> Ini akan menimpa seluruh data member yang ada saat ini.</div>
+                <textarea id="import-input" placeholder="Paste teks data yang diekspor di sini..."></textarea>
+                <button id="import-data" class="button" style="background-color: var(--error-color);"><i class="fas fa-download"></i> Impor Data Sekarang</button>
+            </div>
+        </div>
+
     </div>
 
     <div id="notification" class="notification">
@@ -460,34 +531,6 @@
             
             let html5QrcodeScanner;
 
-            // Inisialisasi tab default
-            document.querySelector('.nav-tab[data-tab="scan"]').classList.add('active');
-            document.getElementById('scan-tab').classList.remove('hidden');
-            
-            // --- FUNGSI PENGELOLA SCANNER ---
-            function startScanner() {
-                if (!html5QrcodeScanner || html5QrcodeScanner.getState() === Html5QrcodeScannerState.NOT_STARTED) {
-                    html5QrcodeScanner = new Html5QrcodeScanner(
-                        "reader", 
-                        { 
-                            fps: 10, 
-                            qrbox: { width: 250, height: 250 },
-                            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-                        },
-                        false
-                    );
-                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-                }
-            }
-            
-            function stopScanner() {
-                if (html5QrcodeScanner && html5QrcodeScanner.getState() === Html5QrcodeScannerState.SCANNING) {
-                    html5QrcodeScanner.clear().catch(error => {
-                        // console.error("Gagal menghentikan scanner.", error);
-                    });
-                }
-            }
-
             // --- LOGIKA NAVIGASI TAB ---
             const tabs = document.querySelectorAll('.nav-tab');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -504,25 +547,49 @@
                     tab.classList.add('active');
                     document.getElementById(`${tabId}-tab`).classList.remove('hidden');
                     
-                    if (tabId === 'scan') {
-                        startScanner();
-                    }
+                    if (tabId === 'scan') startScanner();
+                    if (tabId === 'list') displayAllMembers();
                 });
             });
 
             // Jalankan scanner saat halaman pertama kali dimuat
-            try {
-                startScanner();
-            } catch (e) {
-                console.error("Gagal inisialisasi scanner awal:", e);
-                document.getElementById('reader-container').style.display = 'none';
-                document.getElementById('manual-input-section').style.display = 'block';
+            function initializeApp() {
+                document.querySelector('.nav-tab[data-tab="scan"]').classList.add('active');
+                document.getElementById('scan-tab').classList.remove('hidden');
+                try {
+                    startScanner();
+                } catch (e) {
+                    console.error("Gagal inisialisasi scanner awal:", e);
+                    document.getElementById('reader-container').style.display = 'none';
+                    document.getElementById('manual-input-section').style.display = 'block';
+                }
+            }
+            initializeApp();
+
+
+            // --- FUNGSI PENGELOLA SCANNER ---
+            function startScanner() {
+                const readerElement = document.getElementById("reader");
+                if (!readerElement || (html5QrcodeScanner && html5QrcodeScanner.getState() === 2)) return;
+
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", 
+                    { fps: 10, qrbox: { width: 250, height: 250 }, supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA] },
+                    false
+                );
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            }
+            
+            function stopScanner() {
+                if (html5QrcodeScanner && typeof html5QrcodeScanner.getState === 'function' && html5QrcodeScanner.getState() === 2) {
+                    html5QrcodeScanner.clear().catch(error => {});
+                }
             }
 
             // --- FUNGSI UTILITAS LAINNYA ---
-            function showNotification(message) {
+            function showNotification(message, isError = false) {
                 const notification = document.getElementById('notification');
                 const notificationText = document.getElementById('notification-text');
+                notification.style.backgroundColor = isError ? 'var(--error-color)' : 'var(--primary-color)';
                 notificationText.textContent = message;
                 notification.classList.add('show');
                 setTimeout(() => notification.classList.remove('show'), 3000);
@@ -560,9 +627,7 @@
                 }
             }
 
-            function onScanFailure(error) {
-                // Biarkan kosong agar tidak mengganggu dengan notifikasi error terus-menerus
-            }
+            function onScanFailure(error) {}
             
             // --- EVENT LISTENERS LAINNYA ---
             document.getElementById('submit-manual').addEventListener('click', () => {
@@ -574,7 +639,7 @@
                 if (!lastResult) return;
                 navigator.clipboard.writeText(lastResult)
                     .then(() => showNotification("Kode berhasil disalin!"))
-                    .catch(() => showNotification("Gagal menyalin kode"));
+                    .catch(() => showNotification("Gagal menyalin kode", true));
             });
 
             document.getElementById('paste-member-id').addEventListener('click', async () => {
@@ -585,7 +650,7 @@
                     memberIdInput.dispatchEvent(new Event('input'));
                     showNotification("ID berhasil dipaste");
                 } catch (err) {
-                    showNotification("Gagal membaca clipboard");
+                    showNotification("Gagal membaca clipboard", true);
                 }
             });
             
@@ -621,6 +686,7 @@
                     document.getElementById('member-address').textContent = member.address || '-';
                     document.getElementById('member-phone').textContent = member.phone || '-';
                     document.getElementById('member-points').textContent = member.points || '0';
+                    document.getElementById('member-benefit').textContent = member.benefit || 'Tidak ada';
                     infoContainer.classList.remove('hidden');
                     notFound.classList.add('hidden');
                 } else {
@@ -631,10 +697,10 @@
 
             document.getElementById('save-transaction').addEventListener('click', () => {
                 const amount = parseInt(document.getElementById('transaction-amount').value);
-                const memberId = document.getElementById('member-id-input').value;
+                const memberId = document.getElementById('member-id-input').value.trim();
                 
                 if (!amount || amount <= 0) {
-                    showNotification("Masukkan nominal transaksi yang valid");
+                    showNotification("Masukkan nominal transaksi yang valid", true);
                     return;
                 }
                 
@@ -648,7 +714,7 @@
                     document.getElementById('transaction-amount').value = '';
                     showNotification(`+${pointsToAdd} poin ditambahkan!`);
                 } else {
-                    showNotification("Member tidak ditemukan");
+                    showNotification("Member tidak ditemukan", true);
                 }
             });
 
@@ -657,26 +723,29 @@
                 const name = document.getElementById('new-member-name').value.trim();
                 const address = document.getElementById('new-member-address').value.trim();
                 const phone = document.getElementById('new-member-phone').value.trim();
+                const benefit = document.getElementById('new-member-benefit').value.trim();
                 const photoData = document.getElementById('add-photo-preview').src;
                 
                 if (!memberId || !name) {
-                    showNotification("ID Member dan Nama harus diisi");
+                    showNotification("ID Member dan Nama harus diisi", true);
                     return;
                 }
                 
                 const members = getMembers();
                 if (members[memberId]) {
-                    showNotification("ID Member sudah terdaftar");
+                    showNotification("ID Member sudah terdaftar", true);
                     return;
                 }
                 
-                members[memberId] = { name, address, phone, photo: photoData, points: 10 };
+                members[memberId] = { name, address, phone, benefit, photo: photoData, points: 10 };
                 saveMembers(members);
                 
+                // Clear form
                 document.getElementById('new-member-id').value = '';
                 document.getElementById('new-member-name').value = '';
                 document.getElementById('new-member-address').value = '';
                 document.getElementById('new-member-phone').value = '';
+                document.getElementById('new-member-benefit').value = '';
                 document.getElementById('add-member-photo').value = '';
                 document.getElementById('add-photo-preview').src = PLACEHOLDER_IMAGE;
                 
@@ -702,6 +771,7 @@
                     document.getElementById('edit-member-name').value = member.name || '';
                     document.getElementById('edit-member-address').value = member.address || '';
                     document.getElementById('edit-member-phone').value = member.phone || '';
+                    document.getElementById('edit-member-benefit').value = member.benefit || '';
                     document.getElementById('edit-member-points').value = member.points || '0';
                     editInfo.classList.remove('hidden');
                     notFound.classList.add('hidden');
@@ -716,21 +786,22 @@
                 const name = document.getElementById('edit-member-name').value.trim();
                 const address = document.getElementById('edit-member-address').value.trim();
                 const phone = document.getElementById('edit-member-phone').value.trim();
+                const benefit = document.getElementById('edit-member-benefit').value.trim();
                 const points = parseInt(document.getElementById('edit-member-points').value) || 0;
                 const photoData = document.getElementById('edit-photo-preview').src;
                 
                 if (!name) {
-                    showNotification("Nama harus diisi");
+                    showNotification("Nama harus diisi", true);
                     return;
                 }
                 
                 const members = getMembers();
                 if (members[memberId]) {
-                    members[memberId] = { name, address, phone, points, photo: photoData };
+                    members[memberId] = { name, address, phone, benefit, points, photo: photoData };
                     saveMembers(members);
                     showNotification("Data member berhasil diperbarui!");
                 } else {
-                    showNotification("Member tidak ditemukan");
+                    showNotification("Member tidak ditemukan", true);
                 }
             });
 
@@ -743,6 +814,72 @@
                     document.getElementById('edit-search-id').value = '';
                     document.getElementById('edit-member-info').classList.add('hidden');
                     showNotification(`Member ${memberId} telah dihapus`);
+                }
+            });
+
+            // --- FUNGSI UNTUK FITUR BARU ---
+            function displayAllMembers() {
+                const listContainer = document.getElementById('all-members-list');
+                const members = getMembers();
+                const memberIds = Object.keys(members);
+                
+                listContainer.innerHTML = '';
+                
+                if (memberIds.length === 0) {
+                    listContainer.innerHTML = '<p>Belum ada member yang terdaftar.</p>';
+                    return;
+                }
+                
+                memberIds.forEach(id => {
+                    const member = members[id];
+                    const item = document.createElement('div');
+                    item.className = 'member-list-item';
+                    item.innerHTML = `
+                        <img src="${member.photo || PLACEHOLDER_IMAGE}" alt="Foto ${member.name}">
+                        <div class="member-list-info">
+                            <p><strong>${member.name}</strong></p>
+                            <p style="font-size:0.9em; opacity:0.8;">ID: ${id} | Poin: ${member.points || 0}</p>
+                        </div>
+                    `;
+                    listContainer.appendChild(item);
+                });
+            }
+
+            document.getElementById('export-data').addEventListener('click', () => {
+                const members = getMembers();
+                if (Object.keys(members).length === 0) {
+                    showNotification("Tidak ada data untuk diekspor", true);
+                    return;
+                }
+                const dataString = JSON.stringify(members);
+                const base64Data = btoa(dataString); // Encode to Base64 for safe copy-paste
+                document.getElementById('export-output').value = base64Data;
+                showNotification("Data berhasil diekspor ke kotak teks!");
+            });
+
+            document.getElementById('import-data').addEventListener('click', () => {
+                const base64Data = document.getElementById('import-input').value.trim();
+                if (!base64Data) {
+                    showNotification("Kotak input data kosong!", true);
+                    return;
+                }
+
+                if (confirm('PERINGATAN: Ini akan menghapus semua data member saat ini dan menggantinya dengan data baru. Lanjutkan?')) {
+                    try {
+                        const dataString = atob(base64Data); // Decode from Base64
+                        const newMembers = JSON.parse(dataString);
+                        
+                        // Simple validation
+                        if (typeof newMembers === 'object' && newMembers !== null) {
+                            saveMembers(newMembers);
+                            document.getElementById('import-input').value = '';
+                            showNotification("Data berhasil diimpor!");
+                        } else {
+                            throw new Error("Data tidak valid.");
+                        }
+                    } catch (e) {
+                        showNotification("Gagal mengimpor data. Pastikan format data benar.", true);
+                    }
                 }
             });
         });
